@@ -1,0 +1,14 @@
+version: '3.2'
+services:
+  db:
+    image: "postgres:14.5"
+    container_name: "abc"
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=department-db
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_HOST_AUTH_METHOD=trust
+      - TZ=UTC
+      - PGTZ=UTC

@@ -3,17 +3,17 @@ spring:
     name: "department-service"
   jpa:
     show-sql: true
-  datasource:
-    url: jdbc:h2:mem:testdb
-    username: sa
-    password: password
-    driverClassName: org.h2.Driver
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/sdlc
+#    username: sa
+#    password: password
+#    driverClassName: org.postgresql.Driver
 server:
   error:
     include-stacktrace: never
   port: 8096
 
-eureka:
-  client:
-    service-url:
-      defaultZone: http://103.142.137.207:3000/eureka
+#eureka:
+#  client:
+#    service-url:
+#      defaultZone: http://103.142.137.207:3000/eureka
