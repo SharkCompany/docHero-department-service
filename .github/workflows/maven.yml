@@ -11,6 +11,8 @@ name: Build and Deploy
 on:
   push:
     branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 
 jobs:
   build:
@@ -38,24 +40,24 @@ jobs:
         password: ${{ secrets.DOCKER_PASSWORD }}
   
   
-  publish:
-    runs-on: ubuntu-latest
-    environment: docker_credentials
-    needs: build
+#   publish:
+#     runs-on: ubuntu-latest
+#     environment: docker_credentials
+#     needs: build
 
-    steps:
-    - uses: actions/checkout@v3
+#     steps:
+#     - uses: actions/checkout@v3
       
-    - name: Deploy to Docker Host
-      uses: wshihadeh/docker-deployment-action@v1
-      with:
-        remote_docker_host: root@103.142.137.207
-        ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY  }}
-        ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
-        copy_stack_file: true
-        deploy_path: /root/department-crud
-        deployment_mode: docker-compose
-        stack_file_name: docker-compose.yml
-        args: up -d
-        docker_prune: 'false'
-        pull_images_first: 'true'
+#     - name: Deploy to Docker Host
+#       uses: wshihadeh/docker-deployment-action@v1
+#       with:
+#         remote_docker_host: root@103.142.137.207
+#         ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY  }}
+#         ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+#         copy_stack_file: true
+#         deploy_path: /root/department-crud
+#         deployment_mode: docker-compose
+#         stack_file_name: docker-compose.yml
+#         args: up -d
+#         docker_prune: 'false'
+#         pull_images_first: 'true'
