@@ -32,6 +32,12 @@ public class Folder {
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL)
     private Set<Folder> subFolders;
 
+    @Column(name = "created_by")
+    private String createdBy;
+
+    @Column(name = "updated_by")
+    private String updatedBy;
+
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
@@ -40,6 +46,9 @@ public class Folder {
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;
+
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
 
     @ManyToOne
     @JoinColumn(name = "department_reference_id",
@@ -53,6 +62,7 @@ public class Folder {
         this.folderId = UUID.randomUUID().toString();
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
+        this.isDeleted = false;
     }
 
     @PreUpdate

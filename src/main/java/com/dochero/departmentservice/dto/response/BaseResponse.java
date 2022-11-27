@@ -6,7 +6,6 @@ import lombok.Data;
 @Data
 @AllArgsConstructor
 public class BaseResponse<T> {
-    private String status;
     private T data;
     private String message;
     private boolean error;

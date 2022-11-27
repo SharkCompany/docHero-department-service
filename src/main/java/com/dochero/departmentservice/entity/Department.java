@@ -25,6 +25,9 @@ public class Department {
     @Column(name = "description")
     private String description;
 
+    @Column(name = "is_deleted")
+    private boolean isDeleted;
+
     @Column(name = "deleted_at")
     private Timestamp deletedAt;
 
@@ -38,6 +41,7 @@ public class Department {
         this.departmentId = UUID.randomUUID().toString();
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
+        this.isDeleted = false;
     }
     @PreUpdate
     private void updatedTime() {

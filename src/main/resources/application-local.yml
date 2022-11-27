@@ -8,6 +8,7 @@ spring:
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
+        default_schema: department
   datasource:
     url: jdbc:postgresql://localhost:5432/department-db
     username: postgres
@@ -22,7 +23,6 @@ spring:
     user: postgres
     password: password
     locations: classpath:db/migration
-
 
 server:
   error:
