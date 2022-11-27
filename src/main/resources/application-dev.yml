@@ -3,11 +3,11 @@ spring:
     name: "department-service"
   jpa:
     show-sql: true
-#  datasource:
-#    url: jdbc:postgresql://localhost:5432/sdlc
-#    username: sa
-#    password: password
-#    driverClassName: org.postgresql.Driver
+  datasource:
+    url: jdbc:postgresql://localhost:5432/sdlc
+    username: postgres
+    password: password
+    driverClassName: org.postgresql.Driver
 server:
   error:
     include-stacktrace: never
