@@ -17,7 +17,7 @@ import java.util.UUID;
 public class Department {
     @Id
     @Column(name = "department_id")
-    private String departmentId;
+    private String id;
 
     @Column(name = "department_name")
     private String departmentName;
@@ -38,7 +38,7 @@ public class Department {
     private Timestamp updatedAt;
     @PrePersist
     private void initData() {
-        this.departmentId = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString();
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
         this.isDeleted = false;

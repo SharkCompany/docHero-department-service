@@ -3,34 +3,36 @@ package com.dochero.departmentservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Folder {
     @Id
     @Column(name = "folder_id")
-    private String folderId;
+    private String id;
     @Column(name = "folder_name")
-    private String name;
+    private String folderName;
 
     @ManyToOne
-    @JoinColumn(referencedColumnName = "folder_id", columnDefinition = "parent_folder_id")
+    @JoinColumn(name = "parent_folder_id", referencedColumnName = "folder_id")
     @JsonBackReference
-    @Nullable
     private Folder parentFolder;
 
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL)
-    private Set<Folder> subFolders;
+    private List<Folder> subFolders;
 
     @Column(name = "created_by")
     private String createdBy;
@@ -50,16 +52,17 @@ public class Folder {
     @Column(name = "is_deleted")
     private boolean isDeleted;
 
+    @Column(name = "department_reference_id")
+    private String departmentId;
+
     @ManyToOne
-    @JoinColumn(name = "department_reference_id",
-            referencedColumnName = "department_id",
-            columnDefinition = "department_reference_id")
+    @JoinColumn(referencedColumnName = "department_id")
     @JsonIgnore
     private Department department;
 
     @PrePersist
     private void initData() {
-        this.folderId = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString();
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
         this.isDeleted = false;

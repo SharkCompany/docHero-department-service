@@ -11,9 +11,9 @@ import javax.validation.constraints.NotNull;
 @Builder
 public class DepartmentRequest {
     // not blank means not null and trim lengthh > 0
-    @NotBlank
+    @NotBlank(message = "Department name could not be blank")
     String name;
 
-    @NotBlank
+    @NotBlank(message = "Description could not be blank")
     String description;
 }
