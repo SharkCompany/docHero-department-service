@@ -43,15 +43,4 @@ public class FolderController {
             return ResponseEntity.badRequest().body(body);
         }
     }
-
-    @GetMapping({"/{departmentId}/tree"})
-    public ResponseEntity<?> getFoldersTreeByDepartmentId(@PathVariable("departmentId") String departmentId) {
-        try {
-            return ResponseEntity.ok().body(folderService.getFoldersTreeByDepartmentId(departmentId));
-        } catch (Exception e) {
-            LOGGER.error("Failed to get folder. " + e);
-            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.badRequest().body(body);
-        }
-    }
 }

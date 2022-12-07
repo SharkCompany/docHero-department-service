@@ -3,6 +3,7 @@ package com.dochero.departmentservice.controller;
 import com.dochero.departmentservice.dto.request.DepartmentRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
 import com.dochero.departmentservice.service.DepartmentService;
+import com.dochero.departmentservice.service.FolderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,9 +20,11 @@ import java.util.Objects;
 public class DepartmentController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentController.class);
     private final DepartmentService departmentService;
+    private final FolderService folderService;
     @Autowired
-    public DepartmentController(DepartmentService departmentService) {
+    public DepartmentController(DepartmentService departmentService, FolderService folderService) {
         this.departmentService = departmentService;
+        this.folderService = folderService;
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -76,13 +79,22 @@ public class DepartmentController {
         }
     }
 
-
     @GetMapping
     public ResponseEntity<?> getAllDepartments() {
         try {
             return ResponseEntity.ok().body(departmentService.getAllDepartments());
         } catch (Exception e) {
             LOGGER.error("Failed to get department. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+    @GetMapping({"/{departmentId}/folder-same-parent"})
+    public ResponseEntity<?> getFoldersInSameParent(@PathVariable("departmentId") String departmentId, @RequestParam(value = "folderId", required = false) String folderId) {
+        try {
+            return ResponseEntity.ok().body(folderService.getFoldersInSameParentFolderId(departmentId, folderId));
+        } catch (Exception e) {
+            LOGGER.error("Failed to get folder in same parent. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }

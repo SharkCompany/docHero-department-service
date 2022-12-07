@@ -26,13 +26,8 @@ public class Folder {
     @Column(name = "folder_name")
     private String folderName;
 
-    @ManyToOne
-    @JoinColumn(name = "parent_folder_id", referencedColumnName = "folder_id")
-    @JsonBackReference
-    private Folder parentFolder;
-
-    @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL)
-    private List<Folder> subFolders;
+    @Column(name = "parent_folder_id")
+    private String parentFolderId;
 
     @Column(name = "created_by")
     private String createdBy;
@@ -59,6 +54,14 @@ public class Folder {
     @JoinColumn(referencedColumnName = "department_id")
     @JsonIgnore
     private Department department;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_folder_id",referencedColumnName = "folder_id", insertable = false, updatable = false )
+    @JsonBackReference
+    private Folder parentFolder;
+
+    @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL)
+    private List<Folder> subFolders;
 
     @PrePersist
     private void initData() {

@@ -25,7 +25,7 @@ public class FolderSearchSpecification<T> implements Specification<Folder> {
             return null;
         }
 
-        if (searchValue.getClass().equals(String.class)) {
+        if (searchValue != null && searchValue.getClass().equals(String.class)) {
             String value = String.valueOf(searchValue);
             for (String wcc : QueryParamUtil.wildCardChars) {
                 value = StringUtils.replace(value, wcc, "\\" + wcc);

@@ -3,6 +3,7 @@ package com.dochero.departmentservice.service.impl;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.constant.SearchOperation;
 import com.dochero.departmentservice.dto.request.CreateFolderRequest;
+import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
 import com.dochero.departmentservice.entity.Department;
 import com.dochero.departmentservice.entity.Folder;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -31,33 +33,19 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public DepartmentResponse getFoldersTreeByDepartmentId(String departmentId) {
+    public DepartmentResponse getFoldersInSameParentFolderId(String departmentId, String parentFolderId) {
         Department department = departmentRepository.findByIdAndIsDeletedFalse(departmentId)
                 .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
 
-        Specification<Folder> specs = FolderSearchSpecification.getSearchSpec("departmentId", SearchOperation.EQUAL, department.getId());
-        specs = Objects.requireNonNull(specs).and(FolderSearchSpecification.getSearchSpec("isDeleted", SearchOperation.EQUAL, false));
-
-        List<Folder> result = folderRepository.findAll(specs);
-        return new DepartmentResponse(result, "Get folders successfully");
-    }
-
-    @Override
-    public DepartmentResponse getFoldersInSameParentFolderId(String parentFolderId, String departmentId) {
-        Department department = departmentRepository.findByIdAndIsDeletedFalse(departmentId)
-                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
-
-        Specification<Folder> specs = FolderSearchSpecification.getSearchSpec("departmentId", SearchOperation.EQUAL, department.getId());
-        specs = Objects.requireNonNull(specs).and(FolderSearchSpecification.getSearchSpec("isDeleted", SearchOperation.EQUAL, false));
-
-        // check if request has parent folder id then add specifcation to get parent folder id
-        if (StringUtils.isNotBlank(parentFolderId)) {
-            specs = specs.and(FolderSearchSpecification.getSearchSpec("parentFolderId", SearchOperation.EQUAL, parentFolderId));
+        List<Folder> result;
+        if (!StringUtils.isBlank(parentFolderId)) {
+            Folder folder = folderRepository.findByIdAndIsDeletedFalse(parentFolderId)
+                    .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+            result = folder.getSubFolders();
         } else {
-            specs = specs.and(FolderSearchSpecification.getSearchSpec("parentFolderId", SearchOperation.IS_NULL, null));
+            result = getFoldersByParentFolderIdAndDepartment(parentFolderId, department.getId());
         }
 
-        List<Folder> result = folderRepository.findAll(specs);
         return new DepartmentResponse(result, "Get folders successfully");
     }
 
@@ -66,44 +54,40 @@ public class FolderServiceImpl implements FolderService {
         Department department = departmentRepository.findByIdAndIsDeletedFalse(request.getDepartmentId())
                 .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
 
-        //if parent folder id is null or blank, then create root folder
-        if (StringUtils.isBlank(request.getParentFolderId())) {
-            Folder folder = Folder.builder()
-                    .department(department)
-                    .folderName(request.getFolderName())
-                    .build();
-            Folder savedFolder = folderRepository.save(folder);
-            return new DepartmentResponse(savedFolder, "Create folder successfully");
-        }
-
-        Folder parentFolder = folderRepository.findByIdAndIsDeletedFalse(request.getParentFolderId())
-                .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
-        boolean folderNameExists = isFolderNameExists(request.getFolderName(), parentFolder.getSubFolders());
-
-        if (folderNameExists) {
+        List<Folder> relatedFolders = getFoldersByParentFolderIdAndDepartment(request.getParentFolderId(), department.getId());
+        if (isFolderNameExists(request.getFolderName(), relatedFolders)) {
             throw new FolderException(AppMessage.FOLDER_NAME_EXISTS_MESSAGE);
         }
 
         Folder folder = Folder.builder()
-                .department(department)
+                .departmentId(department.getId())
                 .folderName(request.getFolderName())
-                .parentFolder(parentFolder)
                 .build();
+        if (!StringUtils.isBlank(request.getParentFolderId())) {
+            folder.setParentFolderId(request.getParentFolderId());
+        }
+
         Folder savedFolder = folderRepository.save(folder);
         return new DepartmentResponse(savedFolder, "Create folder successfully");
     }
 
-    private List<Folder> getFoldersByParentFolderIdAndDepartment(String folderParentId, Department department) {
-        Specification<Folder> specs = FolderSearchSpecification.getSearchSpec("departmentId", SearchOperation.EQUAL, department.getId());
+    @Override
+    public DepartmentResponse updateFolder(UpdateFolderRequest request) {
+        return null;
+    }
+
+    private List<Folder> getFoldersByParentFolderIdAndDepartment(String parentFolderId, String departmentId) {
+        Specification<Folder> specs = FolderSearchSpecification.getSearchSpec("departmentId", SearchOperation.EQUAL, departmentId);
         specs = Objects.requireNonNull(specs).and(FolderSearchSpecification.getSearchSpec("isDeleted", SearchOperation.EQUAL, false));
 
         // check if request has parent folder id then add specifcation to get parent folder id
-        if (StringUtils.isNotBlank(folderParentId)) {
-            specs = specs.and(FolderSearchSpecification.getSearchSpec("parentFolderId", SearchOperation.EQUAL, folderParentId));
+        if (StringUtils.isNotBlank(parentFolderId)) {
+            Folder parentFolder = folderRepository.findByIdAndIsDeletedFalse(parentFolderId)
+                    .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+            specs = specs.and(FolderSearchSpecification.getSearchSpec("parentFolderId", SearchOperation.EQUAL, parentFolder.getId()));
         } else {
             specs = specs.and(FolderSearchSpecification.getSearchSpec("parentFolderId", SearchOperation.IS_NULL, null));
         }
-
         return folderRepository.findAll(specs);
     }
 
