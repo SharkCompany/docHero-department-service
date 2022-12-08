@@ -11,6 +11,4 @@ import java.util.Optional;
 
 @Repository
 public interface FolderRepository extends JpaRepository<Folder, String>, JpaSpecificationExecutor<Folder> {
-    Optional<Folder> findByIdAndIsDeletedFalse(String folderId);
-
 }

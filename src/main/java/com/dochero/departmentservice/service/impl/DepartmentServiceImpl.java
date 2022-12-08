@@ -43,7 +43,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public DepartmentResponse updateDepartment(String departmentId, DepartmentRequest request) {
-        Department department = departmentRepository.findByIdAndIsDeletedFalse(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         department.setDepartmentName(request.getName());
         department.setDescription(request.getName());
         Department savedDepartment = departmentRepository.save(department);
@@ -53,7 +53,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public DepartmentResponse deleteDepartment(String departmentId) {
-        Department department = departmentRepository.findByIdAndIsDeletedFalse(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         department.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
         department.setDeleted(true);
         departmentRepository.save(department);
@@ -63,14 +63,14 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public DepartmentResponse getDepartmentById(String departmentId) {
-        Department department = departmentRepository.findByIdAndIsDeletedFalse(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         return new DepartmentResponse(department, "Get department by id successfully");
     }
 
     @Override
     public DepartmentResponse getAllDepartments() {
         // todo consider specification query or not
-        List<Department> departments = departmentRepository.findByIsDeletedFalse();
+        List<Department> departments = departmentRepository.findAll();
         return new DepartmentResponse(departments, "Get department successfully");
     }
 }

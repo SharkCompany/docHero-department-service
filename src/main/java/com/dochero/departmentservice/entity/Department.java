@@ -1,6 +1,7 @@
 package com.dochero.departmentservice.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -14,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "department")
+@Where(clause = "is_deleted = false")
 public class Department {
     @Id
     @Column(name = "department_id")

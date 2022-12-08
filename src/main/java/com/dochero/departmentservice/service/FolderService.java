@@ -10,9 +10,9 @@ public interface FolderService {
 
     DepartmentResponse createFolder(CreateFolderRequest request);
 
-    DepartmentResponse updateFolder(UpdateFolderRequest request);
+    DepartmentResponse updateFolder(String folderId ,UpdateFolderRequest request);
 
-//    DepartmentResponse deleteFolder();
+    DepartmentResponse deleteFolder(String folderId);
 
 //    DepartmentResponse getAbsolutePath(String name, boolean isFolder);
 
