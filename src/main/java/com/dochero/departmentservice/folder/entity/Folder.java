@@ -1,17 +1,17 @@
-package com.dochero.departmentservice.entity;
+package com.dochero.departmentservice.folder.entity;
 
 
+import com.dochero.departmentservice.department.entity.Department;
+import com.dochero.departmentservice.document.entity.Document;
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.Where;
-import org.springframework.lang.Nullable;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -52,8 +52,11 @@ public class Folder {
     @Column(name = "department_reference_id")
     private String departmentId;
 
+    @Column(name = "is_root")
+    private boolean isRoot;
+
     @ManyToOne
-    @JoinColumn(referencedColumnName = "department_id")
+    @JoinColumn(name = "department_reference_id", referencedColumnName = "department_id", insertable = false, updatable = false )
     @JsonIgnore
     private Department department;
 
@@ -65,12 +68,16 @@ public class Folder {
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.ALL)
     private List<Folder> subFolders;
 
+    @OneToMany(mappedBy = "referenceFolderId", cascade = CascadeType.ALL)
+    private List<Document> documents;
+
     @PrePersist
     private void initData() {
         this.id = UUID.randomUUID().toString();
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
         this.isDeleted = false;
+        this.isRoot = false;
     }
 
     @PreUpdate

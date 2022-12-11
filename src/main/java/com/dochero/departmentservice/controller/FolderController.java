@@ -3,7 +3,7 @@ package com.dochero.departmentservice.controller;
 import com.dochero.departmentservice.dto.request.CreateFolderRequest;
 import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
-import com.dochero.departmentservice.service.FolderService;
+import com.dochero.departmentservice.folder.service.FolderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

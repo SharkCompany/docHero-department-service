@@ -12,5 +12,7 @@ import javax.validation.constraints.NotBlank;
 public class UpdateFolderRequest {
     @NotBlank(message = "Folder name could not be blanked")
     private String folderName;
+
+    @NotBlank(message = "Parent folder id could not be blanked")
     private String parentFolderId;
 }

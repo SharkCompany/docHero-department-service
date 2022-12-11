@@ -1,6 +1,6 @@
 package com.dochero.departmentservice.search;
 
-import com.dochero.departmentservice.entity.Folder;
+import com.dochero.departmentservice.folder.entity.Folder;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

@@ -2,8 +2,8 @@ package com.dochero.departmentservice.controller;
 
 import com.dochero.departmentservice.dto.request.DepartmentRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
-import com.dochero.departmentservice.service.DepartmentService;
-import com.dochero.departmentservice.service.FolderService;
+import com.dochero.departmentservice.department.service.DepartmentService;
+import com.dochero.departmentservice.folder.service.FolderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,10 +89,11 @@ public class DepartmentController {
             return ResponseEntity.badRequest().body(body);
         }
     }
-    @GetMapping({"/{departmentId}/folder-same-parent"})
-    public ResponseEntity<?> getFoldersInSameParent(@PathVariable("departmentId") String departmentId, @RequestParam(value = "folderId", required = false) String folderId) {
+    @GetMapping({"/{departmentId}/items-folder"})
+    public ResponseEntity<?> getFoldersInSameParent(@PathVariable("departmentId") String departmentId,
+                                                    @RequestParam(value = "folderId") String folderId) {
         try {
-            return ResponseEntity.ok().body(folderService.getFoldersInSameParentFolderId(departmentId, folderId));
+            return ResponseEntity.ok().body(folderService.getItemsInSameParentFolderId(departmentId, folderId));
         } catch (Exception e) {
             LOGGER.error("Failed to get folder in same parent. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());

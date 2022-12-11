@@ -1,4 +1,4 @@
-package com.dochero.departmentservice.entity;
+package com.dochero.departmentservice.department.entity;
 
 import lombok.*;
 import org.hibernate.annotations.Where;

@@ -1,7 +1,7 @@
 package com.dochero.departmentservice.search;
 
 import com.dochero.departmentservice.constant.SearchOperation;
-import com.dochero.departmentservice.entity.Folder;
+import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.utils.QueryParamUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
