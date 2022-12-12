@@ -16,6 +16,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "document")
+@Where(clause = "is_deleted = false")
 public class Document {
     @Id
     @Column(name = "document_id")

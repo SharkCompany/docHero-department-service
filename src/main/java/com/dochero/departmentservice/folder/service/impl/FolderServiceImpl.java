@@ -72,6 +72,7 @@ public class FolderServiceImpl implements FolderService {
                 .folderName(request.getFolderName())
                 .parentFolderId(request.getParentFolderId())
                 .build();
+        // Todo: set created by
         Folder savedFolder = folderRepository.save(folder);
         return new DepartmentResponse(savedFolder, "Create folder successfully");
     }
