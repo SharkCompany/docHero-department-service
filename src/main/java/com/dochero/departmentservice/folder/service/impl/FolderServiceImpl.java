@@ -57,6 +57,7 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse createFolder(CreateFolderRequest request) {
         Department department = departmentRepository.findById(request.getDepartmentId())
                 .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
@@ -78,6 +79,7 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse updateFolder(String folderId, UpdateFolderRequest request) {
         // If folder exists
         Folder folder = folderRepository.findById(folderId)

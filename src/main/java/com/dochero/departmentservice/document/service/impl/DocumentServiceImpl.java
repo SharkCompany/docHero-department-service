@@ -6,6 +6,7 @@ import com.dochero.departmentservice.document.entity.DocumentType;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.document.repository.DocumentTypeRepository;
 import com.dochero.departmentservice.document.service.DocumentService;
+import com.dochero.departmentservice.dto.FolderItemsDTO;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
@@ -13,8 +14,10 @@ import com.dochero.departmentservice.exception.DocumentException;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
+import com.dochero.departmentservice.utils.FolderItemMapperUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -34,6 +37,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse createDocument(CreateDocumentRequest request) {
         Folder folder = folderRepository.findById(request.getFolderId())
                 .orElseThrow(() -> new DocumentException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
@@ -58,6 +62,7 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
+    @Transactional
     public DepartmentResponse updateDocument(String documentId, UpdateDocumentRequest request) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_NOT_FOUND_MESSAGE));
@@ -77,17 +82,19 @@ public class DocumentServiceImpl implements DocumentService {
             //Todo: who made the changes
         }
         Document saveDocument = documentRepository.save(document);
-        return new DepartmentResponse(saveDocument, "Update document successfully");
+        FolderItemsDTO folderItemsDTO = FolderItemMapperUtil.mapDocumentToFolderItemsDTO(saveDocument);
+        return new DepartmentResponse(folderItemsDTO, "Update document successfully");
     }
 
     @Override
+    @Transactional
     public DepartmentResponse deleteDocument(String documentId) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_NOT_FOUND_MESSAGE));
         document.setDeleted(true);
         document.setDeletedAt(Timestamp.from(Instant.now()));
         //Todo: who made the changes
-        return new DepartmentResponse(document, "Delete document successfully");
+        return new DepartmentResponse(null, "Delete document successfully");
     }
 
     private boolean isDocumentTitleExist(String title, String extension, List<Document> documents) {
