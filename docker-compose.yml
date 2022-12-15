@@ -1,14 +1,10 @@
-version: '3.2'
+version: "3.8"
+
 services:
-  db:
-    image: "postgres:14.5"
-    container_name: "abc"
+  department-server:
+    image: kan19/dochero-department-service
+    container_name: dochero-department-service
     ports:
-      - "5432:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_DB=department-db
-      - POSTGRES_PASSWORD=password
-      - POSTGRES_HOST_AUTH_METHOD=trust
-      - TZ=UTC
-      - PGTZ=UTC
+      - 8096:8096
+    stdin_open: true
+    tty: true
