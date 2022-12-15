@@ -8,6 +8,6 @@ public class TestController {
 
     @GetMapping("/test")
     public String checkServer() {
-        return "Server is up and runing";
+        return "Server is up and runing test cicd";
     }
 }
