@@ -1,4 +1,4 @@
-package com.dochero.departmentservice.service;
+package com.dochero.departmentservice.department.service;
 
 import com.dochero.departmentservice.dto.request.DepartmentRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;

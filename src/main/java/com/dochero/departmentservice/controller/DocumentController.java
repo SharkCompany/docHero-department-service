@@ -1,9 +1,11 @@
 package com.dochero.departmentservice.controller;
 
+import com.dochero.departmentservice.document.service.DocumentService;
+import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.CreateFolderRequest;
+import com.dochero.departmentservice.dto.request.UpdateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
-import com.dochero.departmentservice.folder.service.FolderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,15 +18,15 @@ import javax.validation.Valid;
 import java.util.Objects;
 
 @RestController
-@RequestMapping("/folder")
-public class FolderController {
-    private static final Logger LOGGER = LoggerFactory.getLogger(FolderController.class);
+@RequestMapping("/document")
+public class DocumentController {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
 
-    private final FolderService folderService;
+    private final DocumentService documentService;
 
     @Autowired
-    public FolderController(FolderService folderService) {
-        this.folderService = folderService;
+    public DocumentController(DocumentService documentService) {
+        this.documentService = documentService;
     }
 
     @ResponseStatus(HttpStatus.BAD_REQUEST)
@@ -35,36 +37,37 @@ public class FolderController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createFolder(@RequestBody @Valid CreateFolderRequest request) {
+    public ResponseEntity<?> createDocument(@RequestBody @Valid CreateDocumentRequest request) {
         try {
-            return ResponseEntity.ok().body(folderService.createFolder(request));
+            return ResponseEntity.ok().body(documentService.createDocument(request));
         } catch (Exception e) {
-            LOGGER.error("Failed to create folder. " + e);
+            LOGGER.error("Failed to create document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }
     }
 
-    @PutMapping("/{folderId}")
-    public ResponseEntity<?> updateFolder(@PathVariable("folderId") String folderId,
-                                          @RequestBody @Valid UpdateFolderRequest request) {
+    @PutMapping("/{documentId}")
+    public ResponseEntity<?> updateDocument(@PathVariable("documentId") String documentId,
+                                          @RequestBody @Valid UpdateDocumentRequest request) {
         try {
-            return ResponseEntity.ok().body(folderService.updateFolder(folderId, request));
+            return ResponseEntity.ok().body(documentService.updateDocument(documentId, request));
         } catch (Exception e) {
-            LOGGER.error("Failed to Update folder. " + e);
+            LOGGER.error("Failed to update document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }
     }
 
-    @DeleteMapping("/{folderId}")
-    public ResponseEntity<?> deleteFolder(@PathVariable("folderId") String folderId) {
+    @DeleteMapping("/{documentId}")
+    public ResponseEntity<?> deleteFolder(@PathVariable("documentId") String documentId) {
         try {
-            return ResponseEntity.ok().body(folderService.deleteFolder(folderId));
+            return ResponseEntity.ok().body(documentService.deleteDocument(documentId));
         } catch (Exception e) {
-            LOGGER.error("Failed to delete folder. " + e);
+            LOGGER.error("Failed to delete document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }
     }
+
 }

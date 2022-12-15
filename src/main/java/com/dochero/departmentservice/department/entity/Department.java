@@ -1,6 +1,7 @@
-package com.dochero.departmentservice.entity;
+package com.dochero.departmentservice.department.entity;
 
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
@@ -14,10 +15,11 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "department")
+@Where(clause = "is_deleted = false")
 public class Department {
     @Id
     @Column(name = "department_id")
-    private String departmentId;
+    private String id;
 
     @Column(name = "department_name")
     private String departmentName;
@@ -38,7 +40,7 @@ public class Department {
     private Timestamp updatedAt;
     @PrePersist
     private void initData() {
-        this.departmentId = UUID.randomUUID().toString();
+        this.id = UUID.randomUUID().toString();
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
         this.isDeleted = false;

@@ -1,12 +1,17 @@
-package com.dochero.departmentservice.service.impl;
+package com.dochero.departmentservice.department.service.impl;
 
+import com.dochero.departmentservice.common.service.CommonFunctionService;
+import com.dochero.departmentservice.constant.AdministratorConstants;
+import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.dto.request.DepartmentRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
-import com.dochero.departmentservice.entity.Department;
-import com.dochero.departmentservice.exception.AppMessage;
+import com.dochero.departmentservice.department.entity.Department;
+import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.exception.DepartmentException;
-import com.dochero.departmentservice.repository.DepartmentRepository;
-import com.dochero.departmentservice.service.DepartmentService;
+import com.dochero.departmentservice.department.repository.DepartmentRepository;
+import com.dochero.departmentservice.department.service.DepartmentService;
+import com.dochero.departmentservice.folder.entity.Folder;
+import com.dochero.departmentservice.folder.repository.FolderRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +28,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentServiceImpl.class);
 
     private final DepartmentRepository departmentRepository;
+    private final FolderRepository folderRepository;
+    private final CommonFunctionService commonFunctionService;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, FolderRepository folderRepository, CommonFunctionService commonFunctionService) {
         this.departmentRepository = departmentRepository;
+        this.folderRepository = folderRepository;
+        this.commonFunctionService = commonFunctionService;
     }
 
     @Override
@@ -37,6 +46,15 @@ public class DepartmentServiceImpl implements DepartmentService {
                 .description(request.getDescription())
                 .build();
         Department savedDepartment = departmentRepository.save(department);
+
+        String rootFolderName = savedDepartment.getId() + "_root";
+        Folder rootFolder = Folder.builder()
+                .departmentId(savedDepartment.getId())
+                .folderName(rootFolderName)
+                .isRoot(true)
+                .createdBy(AdministratorConstants.SYSTEM_CREATION)
+                .build();
+        folderRepository.save(rootFolder);
         return new DepartmentResponse(savedDepartment, "Create department successfully");
     }
 
@@ -45,7 +63,7 @@ public class DepartmentServiceImpl implements DepartmentService {
     public DepartmentResponse updateDepartment(String departmentId, DepartmentRequest request) {
         Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         department.setDepartmentName(request.getName());
-        department.setDepartmentName(request.getName());
+        department.setDescription(request.getName());
         Department savedDepartment = departmentRepository.save(department);
         return new DepartmentResponse(savedDepartment, "Update department successfully");
     }
@@ -58,6 +76,17 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.setDeleted(true);
         departmentRepository.save(department);
         return new DepartmentResponse(null, "Delete department successfully");
+    }
+
+    private void deleteItemsBelongToDepartment(String departmentId) {
+        Folder rootFolderByDepartmentId = commonFunctionService.getRootFolderByDepartmentId(departmentId);
+        List<Document> documentsByParentFolderId = commonFunctionService.getDocumentsByParentFolderId(rootFolderByDepartmentId.getId());
+        //soft delete all documents
+        documentsByParentFolderId.forEach(document -> {
+            document.setDeleted(true);
+            document.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
+        });
+        List<Folder> subFolders = rootFolderByDepartmentId.getSubFolders();
 
     }
 
