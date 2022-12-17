@@ -7,6 +7,7 @@ import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.entity.DocumentType;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.document.repository.DocumentTypeRepository;
+import com.dochero.departmentservice.document.service.DocumentRevisionFeignService;
 import com.dochero.departmentservice.document.service.DocumentService;
 import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.dto.FolderItemsDTO;
@@ -37,14 +38,17 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRevisionClient documentRevisionClient;
 
+    private final DocumentRevisionFeignService documentRevisionFeignService;
+
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, ObjectMapper objectMapper) {
+    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, ObjectMapper objectMapper) {
         this.documentRepository = documentRepository;
         this.folderRepository = folderRepository;
         this.documentTypeRepository = documentTypeRepository;
         this.documentRevisionClient = documentRevisionClient;
+        this.documentRevisionFeignService = documentRevisionFeignService;
         this.objectMapper = objectMapper;
     }
 
@@ -70,7 +74,6 @@ public class DocumentServiceImpl implements DocumentService {
         Document saveDocument = documentRepository.save(document);
         //Todo: Who create the document
 
-        //Todo: Create the first revision of the document
         DocumentRevision blankRevision = documentRevisionClient.createBlankRevision(saveDocument.getId());
         saveDocument.setRevisions(List.of(blankRevision));
         return new DepartmentResponse(saveDocument, "Create document successfully");
@@ -118,10 +121,10 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         // Update document revision
-        List<DocumentRevision> documentRevisions = getDocumentRevisionByDocId(documentId);
+        List<DocumentRevision> documentRevisions = documentRevisionFeignService.getDocumentRevisionByDocId(documentId);
         if (request.getIsContentChanged()) {
             UpdateRevisionRequest updateRevisionRequest = objectMapper.convertValue(request, UpdateRevisionRequest.class);
-            DocumentRevision revisionForExistedDocument = createDocumentRevision(documentId, updateRevisionRequest);
+            DocumentRevision revisionForExistedDocument = documentRevisionFeignService.createDocumentRevision(documentId, updateRevisionRequest);
             documentRevisions.add(0, revisionForExistedDocument);
         }
         //Todo: Who made the changes?
@@ -131,20 +134,17 @@ public class DocumentServiceImpl implements DocumentService {
         return new DepartmentResponse(savedDocument, "Update document detail successfully");
     }
 
-    private List<DocumentRevision> getDocumentRevisionByDocId(String documentId) {
-        try {
-            return documentRevisionClient.getAllRevisionsByDocumentId(documentId);
-        } catch (Exception e) {
-            throw new ServiceException(e.getMessage(), e);
+    @Override
+    public DepartmentResponse getDocumentDetail(String documentId) {
+        Document document = documentRepository.findById(documentId)
+                .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_NOT_FOUND_MESSAGE));
+        List<DocumentRevision> documentRevisions = documentRevisionFeignService.getDocumentRevisionByDocId(documentId);
+        if (documentRevisions.isEmpty()) {
+            DocumentRevision blankRevision = documentRevisionFeignService.createBlankRevision(documentId);
+            documentRevisions.add(blankRevision);
         }
-    }
-
-    private DocumentRevision createDocumentRevision(String documentId, UpdateRevisionRequest request) {
-        try {
-            return documentRevisionClient.createRevisionForExistedDocument(documentId, request);
-        } catch (Exception e) {
-            throw new ServiceException(e.getMessage(), e);
-        }
+        document.setRevisions(documentRevisions);
+        return new DepartmentResponse(document, "Get document detail successfully");
     }
 
     @Override

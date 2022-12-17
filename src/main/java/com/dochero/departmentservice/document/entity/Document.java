@@ -2,6 +2,7 @@ package com.dochero.departmentservice.document.entity;
 
 import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.folder.entity.Folder;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.hibernate.annotations.Where;
 
@@ -53,6 +54,7 @@ public class Document {
 
      @ManyToOne
      @JoinColumn(name = "document_folder_id",referencedColumnName = "folder_id", insertable = false, updatable = false )
+     @JsonIgnore
      private Folder folder;
 
      @ManyToOne

@@ -12,16 +12,16 @@ import java.util.List;
 
 @FeignClient(name = "document-revision-service", url = "${document-revision-service.url}", path = "/document-revision")
 public interface DocumentRevisionClient {
-    @PutMapping("/{documentId}/initial-document")
+    @PutMapping("/document/{documentId}/initial-document")
     DocumentRevision createBlankRevision(@PathVariable("documentId") String documentId);
 
-    @GetMapping("/{documentId}")
+    @GetMapping("/document/{documentId}")
     List<DocumentRevision> getAllRevisionsByDocumentId(@PathVariable("documentId") String documentId);
 
-    @PutMapping("/{documentId}/save-document")
+    @PutMapping("/document/{documentId}/save-document")
     DocumentRevision createRevisionForExistedDocument(@PathVariable("documentId") String documentId, @RequestBody UpdateRevisionRequest updateRevisionRequest);
 
-    @PutMapping("/{documentId}/revert/{documentRevisionId}")
+    @PutMapping("/{documentRevisionId}/document/{documentId}/revert-revision")
     DocumentRevision revertToDocumentRevision(@PathVariable("documentId") String documentId,@PathVariable("documentRevisionId") String revisionId);
 
 }

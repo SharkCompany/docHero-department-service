@@ -8,11 +8,13 @@ import com.dochero.departmentservice.dto.response.DepartmentResponse;
 public interface DocumentService {
 
     DepartmentResponse createDocument(CreateDocumentRequest request);
-//
+
     DepartmentResponse updateDocumentTitle(String documentId , UpdateDocumentTitleRequest request);
 
     DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request);
-//
+
+    DepartmentResponse getDocumentDetail(String documentId);
+
     DepartmentResponse deleteDocument(String documentId);
 
 }
