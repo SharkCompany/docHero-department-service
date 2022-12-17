@@ -1,5 +1,6 @@
 package com.dochero.departmentservice.document.entity;
 
+import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.folder.entity.Folder;
 import lombok.*;
 import org.hibernate.annotations.Where;
@@ -7,6 +8,7 @@ import org.hibernate.annotations.Where;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -56,6 +58,9 @@ public class Document {
      @ManyToOne
      @JoinColumn(name = "document_type_id",referencedColumnName = "document_type_id", insertable = false, updatable = false )
      private DocumentType documentType;
+
+    @Transient
+    private List<DocumentRevision> revisions;
 
     @PrePersist
     private void initData() {

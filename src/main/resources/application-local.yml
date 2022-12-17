@@ -28,6 +28,9 @@ server:
     include-stacktrace: never
   port: 8096
 
+document-revision-service:
+  url: http://103.142.137.207:8090
+
 eureka:
   client:
     service-url:

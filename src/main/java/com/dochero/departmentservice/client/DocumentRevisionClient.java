@@ -1,0 +1,27 @@
+package com.dochero.departmentservice.client;
+
+import com.dochero.departmentservice.client.dto.DocumentRevision;
+import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
+import org.springframework.cloud.openfeign.FeignClient;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import java.util.List;
+
+@FeignClient(name = "document-revision-service", url = "${document-revision-service.url}", path = "/document-revision")
+public interface DocumentRevisionClient {
+    @PutMapping("/{documentId}/initial-document")
+    DocumentRevision createBlankRevision(@PathVariable("documentId") String documentId);
+
+    @GetMapping("/{documentId}")
+    List<DocumentRevision> getAllRevisionsByDocumentId(@PathVariable("documentId") String documentId);
+
+    @PutMapping("/{documentId}/save-document")
+    DocumentRevision createRevisionForExistedDocument(@PathVariable("documentId") String documentId, @RequestBody UpdateRevisionRequest updateRevisionRequest);
+
+    @PutMapping("/{documentId}/revert/{documentRevisionId}")
+    DocumentRevision revertToDocumentRevision(@PathVariable("documentId") String documentId,@PathVariable("documentRevisionId") String revisionId);
+
+}

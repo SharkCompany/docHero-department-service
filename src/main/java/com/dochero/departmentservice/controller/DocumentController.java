@@ -2,9 +2,7 @@ package com.dochero.departmentservice.controller;
 
 import com.dochero.departmentservice.document.service.DocumentService;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
-import com.dochero.departmentservice.dto.request.CreateFolderRequest;
-import com.dochero.departmentservice.dto.request.UpdateDocumentRequest;
-import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
+import com.dochero.departmentservice.dto.request.UpdateDocumentTitleRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,9 +47,9 @@ public class DocumentController {
 
     @PutMapping("/{documentId}")
     public ResponseEntity<?> updateDocument(@PathVariable("documentId") String documentId,
-                                          @RequestBody @Valid UpdateDocumentRequest request) {
+                                          @RequestBody @Valid UpdateDocumentTitleRequest request) {
         try {
-            return ResponseEntity.ok().body(documentService.updateDocument(documentId, request));
+            return ResponseEntity.ok().body(documentService.updateDocumentTitle(documentId, request));
         } catch (Exception e) {
             LOGGER.error("Failed to update document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
@@ -60,7 +58,7 @@ public class DocumentController {
     }
 
     @DeleteMapping("/{documentId}")
-    public ResponseEntity<?> deleteFolder(@PathVariable("documentId") String documentId) {
+    public ResponseEntity<?> deleteDocument(@PathVariable("documentId") String documentId) {
         try {
             return ResponseEntity.ok().body(documentService.deleteDocument(documentId));
         } catch (Exception e) {
