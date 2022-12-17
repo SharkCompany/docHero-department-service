@@ -2,6 +2,7 @@ package com.dochero.departmentservice.controller;
 
 import com.dochero.departmentservice.document.service.DocumentService;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
+import com.dochero.departmentservice.dto.request.UpdateDocumentDetailRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentTitleRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
 import org.slf4j.Logger;
@@ -19,7 +20,6 @@ import java.util.Objects;
 @RequestMapping("/document")
 public class DocumentController {
     private static final Logger LOGGER = LoggerFactory.getLogger(DocumentController.class);
-
     private final DocumentService documentService;
 
     @Autowired
@@ -46,12 +46,35 @@ public class DocumentController {
     }
 
     @PutMapping("/{documentId}")
-    public ResponseEntity<?> updateDocument(@PathVariable("documentId") String documentId,
-                                          @RequestBody @Valid UpdateDocumentTitleRequest request) {
+    public ResponseEntity<?> updateDocumentTitle(@PathVariable("documentId") String documentId,
+                                                 @RequestBody @Valid UpdateDocumentTitleRequest request) {
         try {
             return ResponseEntity.ok().body(documentService.updateDocumentTitle(documentId, request));
         } catch (Exception e) {
             LOGGER.error("Failed to update document. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
+    @PutMapping("/{documentId}/detail")
+    public ResponseEntity<?> updateDocumentDetail(@PathVariable("documentId") String documentId,
+                                                 @RequestBody @Valid UpdateDocumentDetailRequest request) {
+        try {
+            return ResponseEntity.ok().body(documentService.updateDocumentDetail(documentId, request));
+        } catch (Exception e) {
+            LOGGER.error("Failed to update document detail. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
+    @GetMapping("/{documentId}/detail")
+    public ResponseEntity<?> getDocumentDetail(@PathVariable("documentId") String documentId) {
+        try {
+            return ResponseEntity.ok().body(documentService.getDocumentDetail(documentId));
+        } catch (Exception e) {
+            LOGGER.error("Failed to get document detail. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }

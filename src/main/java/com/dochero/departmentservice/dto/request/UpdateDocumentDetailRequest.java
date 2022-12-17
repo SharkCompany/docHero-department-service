@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.Valid;
 import javax.validation.constraints.NotBlank;
 import java.util.List;
 
@@ -18,5 +19,6 @@ public class UpdateDocumentDetailRequest {
     private String title;
     private Boolean isContentChanged;
     private String revisionData;
+    @Valid
     private List<CommentDTO> comments;
 }
