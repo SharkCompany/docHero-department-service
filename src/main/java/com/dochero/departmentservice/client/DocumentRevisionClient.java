@@ -10,8 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-@FeignClient(name = "document-revision-service", url = "${document-revision-service.url}", path = "/document-revision")
+@FeignClient(value = "DOCUMENT-REVISION-SERVICE", path = "/document-revision")
 public interface DocumentRevisionClient {
+    @GetMapping("/test")
+    String testService();
+
     @PutMapping("/document/{documentId}/initial-document")
     DocumentRevision createBlankRevision(@PathVariable("documentId") String documentId);
 
