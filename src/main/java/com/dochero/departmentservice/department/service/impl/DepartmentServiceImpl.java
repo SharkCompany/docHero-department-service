@@ -41,6 +41,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public DepartmentResponse createDepartment(DepartmentRequest request) {
+        if (isDepartmentNameExisted(request.getName())) {
+            throw new DepartmentException(AppMessage.DEPARTMENT_NAME_EXISTED);
+        }
+
         Department department = Department.builder()
                 .departmentName(request.getName())
                 .description(request.getDescription())
@@ -57,6 +61,12 @@ public class DepartmentServiceImpl implements DepartmentService {
         folderRepository.save(rootFolder);
         return new DepartmentResponse(savedDepartment, "Create department successfully");
     }
+
+    // check if department name is existed ignore case
+    private boolean isDepartmentNameExisted(String departmentName) {
+        return departmentRepository.existsByDepartmentNameIgnoreCase(departmentName);
+    }
+
 
     @Override
     @Transactional
