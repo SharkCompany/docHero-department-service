@@ -48,5 +48,5 @@ jobs:
           host: 103.48.192.223
           username: ${{ secrets.NOVAPO_SERVER_USERNAME }}
           password: ${{ secrets.NOVAPO_SERVER_PASSWORD }}
-          script: cd /home/novapo/docker-compose-list/dochero/; docker-compose -f department.docker-compose.yml down --rmi all; docker pull phongvanngo/dochero-department-service;docker-compose -f department.docker-compose.yml up -d;
+          script: cd /home/novapo/docker-compose-list/dochero/; docker-compose -f department.docker-compose.yml down --rmi all; docker-compose -f department.docker-compose.yml pull;docker-compose -f department.docker-compose.yml up -d;
 
