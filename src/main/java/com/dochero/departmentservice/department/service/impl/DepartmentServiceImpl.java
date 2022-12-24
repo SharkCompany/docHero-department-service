@@ -67,7 +67,6 @@ public class DepartmentServiceImpl implements DepartmentService {
         return departmentRepository.existsByDepartmentNameIgnoreCase(departmentName);
     }
 
-
     @Override
     @Transactional
     public DepartmentResponse updateDepartment(String departmentId, DepartmentRequest request) {
