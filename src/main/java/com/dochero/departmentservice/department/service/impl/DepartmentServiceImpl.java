@@ -1,5 +1,6 @@
 package com.dochero.departmentservice.department.service.impl;
 
+import com.dochero.departmentservice.client.dto.DepartmentDTO;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AdministratorConstants;
 import com.dochero.departmentservice.document.entity.Document;
@@ -12,6 +13,7 @@ import com.dochero.departmentservice.department.repository.DepartmentRepository;
 import com.dochero.departmentservice.department.service.DepartmentService;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
+import com.dochero.departmentservice.utils.DepartmentMapperUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -102,13 +104,15 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentResponse getDepartmentById(String departmentId) {
         Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
-        return new DepartmentResponse(department, "Get department by id successfully");
+        DepartmentDTO departmentDTO = DepartmentMapperUtils.convertToDepartmentDTO(department);
+        return new DepartmentResponse(departmentDTO, "Get department by id successfully");
     }
 
     @Override
     public DepartmentResponse getAllDepartments() {
         // todo consider specification query or not
         List<Department> departments = departmentRepository.findAll();
-        return new DepartmentResponse(departments, "Get department successfully");
+        List<DepartmentDTO> departmentDTOS = DepartmentMapperUtils.convertToDepartmentDTOList(departments);
+        return new DepartmentResponse(departmentDTOS, "Get department successfully");
     }
 }
