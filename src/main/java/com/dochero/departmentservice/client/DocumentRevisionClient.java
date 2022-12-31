@@ -10,8 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 
-//@FeignClient(value = "DOCUMENT-REVISION-SERVICE", path = "/document-revision")
-@FeignClient(name = "document-revision-service",path = "/document-revision", url = "http://localhost:8090")
+@FeignClient(value = "DOCUMENT-REVISION-SERVICE", path = "/document-revision")
 public interface DocumentRevisionClient {
     @GetMapping("/test")
     String testService();
