@@ -1,11 +1,13 @@
 package com.dochero.departmentservice.department.entity;
 
+import com.dochero.departmentservice.folder.entity.Folder;
 import lombok.*;
 import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -35,6 +37,10 @@ public class Department {
 
     @Column(name = "created_at")
     private Timestamp createdAt;
+
+    @OneToMany(mappedBy = "departmentId")
+    @Where(clause = "is_root = true")
+    private List<Folder> rootFolder;
 
     @Column(name = "updated_at")
     private Timestamp updatedAt;

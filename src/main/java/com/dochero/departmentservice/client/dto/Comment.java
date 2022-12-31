@@ -1,5 +1,6 @@
 package com.dochero.departmentservice.client.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -10,13 +11,12 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 public class Comment {
-    private String id;
-
-    private String revisionReferenceId;
-
+    @JsonProperty("userId")
+    private String userId;
+    @JsonProperty("fullName")
+    private String fullName;
+    @JsonProperty("content")
     private String content;
-
+    @JsonProperty("createdAt")
     private Timestamp createdAt;
-
-    private String createdBy;
 }
