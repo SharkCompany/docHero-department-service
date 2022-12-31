@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotBlank;
 import java.sql.Timestamp;
 
 @Data
@@ -12,11 +13,16 @@ import java.sql.Timestamp;
 @NoArgsConstructor
 public class Comment {
     @JsonProperty("userId")
+    @NotBlank(message = "UserId could not be blank")
     private String userId;
     @JsonProperty("fullName")
+    @NotBlank(message = "FullName could not be blank")
     private String fullName;
     @JsonProperty("content")
+    @NotBlank(message = "Comment content could not be blank")
     private String content;
+    @NotBlank(message = "CreatedAt could not be blank")
     @JsonProperty("createdAt")
-    private Timestamp createdAt;
+    private String createdAt;
+
 }

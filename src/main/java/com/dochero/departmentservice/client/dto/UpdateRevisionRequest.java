@@ -13,5 +13,5 @@ import java.util.List;
 @Builder
 public class UpdateRevisionRequest {
     private String revisionData;
-    private List<CommentDTO> comments;
+    private List<Comment> comments;
 }

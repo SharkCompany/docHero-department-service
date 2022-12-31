@@ -1,6 +1,6 @@
 package com.dochero.departmentservice.dto.request;
 
-import com.dochero.departmentservice.client.dto.CommentDTO;
+import com.dochero.departmentservice.client.dto.Comment;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -20,5 +20,5 @@ public class UpdateDocumentDetailRequest {
     private Boolean isContentChanged;
     private String revisionData;
     @Valid
-    private List<CommentDTO> comments;
+    private List<Comment> comments;
 }
