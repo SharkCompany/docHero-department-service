@@ -77,7 +77,6 @@ public class Folder {
         this.createdAt = Timestamp.from(Instant.now());
         this.updatedAt = Timestamp.from(Instant.now());
         this.isDeleted = false;
-        this.isRoot = false;
     }
 
     @PreUpdate
