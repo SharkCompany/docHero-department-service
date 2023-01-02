@@ -1,6 +1,6 @@
 package com.dochero.departmentservice.department.service.impl;
 
-import com.dochero.departmentservice.client.dto.DepartmentDTO;
+import com.dochero.departmentservice.dto.DepartmentDTO;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AdministratorConstants;
 import com.dochero.departmentservice.document.entity.Document;

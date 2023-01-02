@@ -1,9 +1,10 @@
-package com.dochero.departmentservice.document.service.impl;
+package com.dochero.departmentservice.client.service.impl;
 
 import com.dochero.departmentservice.client.DocumentRevisionClient;
 import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
-import com.dochero.departmentservice.document.service.DocumentRevisionFeignService;
+import com.dochero.departmentservice.client.service.DocumentRevisionFeignService;
+import com.dochero.departmentservice.exception.ServiceClientException;
 import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,7 +25,7 @@ public class DocumentRevisionFeignServiceImpl implements DocumentRevisionFeignSe
         try {
             return documentRevisionClient.createRevisionForExistedDocument(documentId, request);
         } catch (Exception e) {
-            throw new ServiceException(e.getMessage(), e);
+            throw new ServiceClientException(e.getMessage(), e);
         }
     }
 

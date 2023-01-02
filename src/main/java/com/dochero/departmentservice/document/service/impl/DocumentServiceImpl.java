@@ -2,14 +2,18 @@ package com.dochero.departmentservice.document.service.impl;
 
 import com.dochero.departmentservice.client.DocumentRevisionClient;
 import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
+import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
+import com.dochero.departmentservice.common.service.impl.CommonFunctionServiceImpl;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.entity.DocumentType;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.document.repository.DocumentTypeRepository;
-import com.dochero.departmentservice.document.service.DocumentRevisionFeignService;
+import com.dochero.departmentservice.client.service.DocumentRevisionFeignService;
 import com.dochero.departmentservice.document.service.DocumentService;
 import com.dochero.departmentservice.client.dto.DocumentRevision;
+import com.dochero.departmentservice.dto.DocumentCreateDTO;
+import com.dochero.departmentservice.dto.DocumentDTO;
 import com.dochero.departmentservice.dto.FolderItemsDTO;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentDetailRequest;
@@ -19,9 +23,9 @@ import com.dochero.departmentservice.exception.DocumentException;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
+import com.dochero.departmentservice.utils.DocumentMapperUtils;
 import com.dochero.departmentservice.utils.FolderItemMapperUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.hibernate.service.spi.ServiceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,23 +44,29 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRevisionFeignService documentRevisionFeignService;
 
+    private final CommonFunctionServiceImpl commonFunctionService;
+
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, ObjectMapper objectMapper) {
+    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, CommonFunctionServiceImpl commonFunctionService, ObjectMapper objectMapper) {
         this.documentRepository = documentRepository;
         this.folderRepository = folderRepository;
         this.documentTypeRepository = documentTypeRepository;
         this.documentRevisionClient = documentRevisionClient;
         this.documentRevisionFeignService = documentRevisionFeignService;
+        this.commonFunctionService = commonFunctionService;
         this.objectMapper = objectMapper;
     }
 
     @Override
     @Transactional
-    public DepartmentResponse createDocument(CreateDocumentRequest request) {
+    public DepartmentResponse createDocument(CreateDocumentRequest request, String credentials) {
         Folder folder = folderRepository.findById(request.getFolderId())
                 .orElseThrow(() -> new DocumentException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+
+        ValidateTokenResponse userInfo = commonFunctionService
+                .checkUserIsValidAndReturnUserInfo(folder.getDepartmentId(), credentials);
 
         DocumentType documentType = documentTypeRepository.findByExtensionName(request.getExtension())
                 .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_TYPE_NOT_FOUND_MESSAGE));
@@ -70,14 +80,20 @@ public class DocumentServiceImpl implements DocumentService {
                 .documentTitle(request.getTitle())
                 .documentTypeId(documentType.getId())
                 .referenceFolderId(folder.getId())
+                .referenceDepartmentId(folder.getDepartmentId())
+                .createdBy(userInfo.getUserId())
+                .updatedBy(userInfo.getUserId())
                 .build();
         Document saveDocument = documentRepository.save(document);
-        //Todo: Who create the document
 
         DocumentRevision blankRevision = documentRevisionClient.createBlankRevision(saveDocument.getId());
         saveDocument.setRevisions(List.of(blankRevision));
-        return new DepartmentResponse(saveDocument, "Create document successfully");
+
+        DocumentCreateDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentCreateDTO(document);
+        return new DepartmentResponse(documentDTO, "Create document successfully");
     }
+
+
 
     @Override
     @Transactional
@@ -131,7 +147,8 @@ public class DocumentServiceImpl implements DocumentService {
         Document savedDocument = documentRepository.save(document);
         savedDocument.setRevisions(documentRevisions);
 
-        return new DepartmentResponse(savedDocument, "Update document detail successfully");
+        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document);
+        return new DepartmentResponse(documentDTO, "Update document detail successfully");
     }
 
     @Override
@@ -144,7 +161,8 @@ public class DocumentServiceImpl implements DocumentService {
             documentRevisions.add(blankRevision);
         }
         document.setRevisions(documentRevisions);
-        return new DepartmentResponse(document, "Get document detail successfully");
+        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document);
+        return new DepartmentResponse(documentDTO, "Get document detail successfully");
     }
 
     @Override

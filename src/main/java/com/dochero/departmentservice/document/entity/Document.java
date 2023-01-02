@@ -1,6 +1,7 @@
 package com.dochero.departmentservice.document.entity;
 
 import com.dochero.departmentservice.client.dto.DocumentRevision;
+import com.dochero.departmentservice.department.entity.Department;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
@@ -34,6 +35,9 @@ public class Document {
     @Column(name = "document_folder_id")
     private String referenceFolderId;
 
+    @Column(name = "document_department_id")
+    private String referenceDepartmentId;
+
     @Column(name = "created_by")
     private String createdBy;
 
@@ -54,12 +58,16 @@ public class Document {
 
      @ManyToOne
      @JoinColumn(name = "document_folder_id",referencedColumnName = "folder_id", insertable = false, updatable = false )
-     @JsonIgnore
      private Folder folder;
 
      @ManyToOne
      @JoinColumn(name = "document_type_id",referencedColumnName = "document_type_id", insertable = false, updatable = false )
      private DocumentType documentType;
+
+     @ManyToOne
+     @JoinColumn(name ="document_department_id", referencedColumnName = "department_id", insertable = false, updatable = false )
+     private Department department;
+
 
     @Transient
     private List<DocumentRevision> revisions;
