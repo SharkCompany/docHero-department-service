@@ -1,4 +1,4 @@
-package com.dochero.departmentservice.document.service;
+package com.dochero.departmentservice.client.service;
 
 import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;

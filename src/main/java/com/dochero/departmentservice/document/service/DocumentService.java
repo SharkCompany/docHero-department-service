@@ -7,7 +7,7 @@ import com.dochero.departmentservice.dto.response.DepartmentResponse;
 
 public interface DocumentService {
 
-    DepartmentResponse createDocument(CreateDocumentRequest request);
+    DepartmentResponse createDocument(CreateDocumentRequest request, String credentials);
 
     DepartmentResponse updateDocumentTitle(String documentId , UpdateDocumentTitleRequest request);
 

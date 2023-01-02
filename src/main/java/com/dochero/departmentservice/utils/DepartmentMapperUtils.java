@@ -1,6 +1,6 @@
 package com.dochero.departmentservice.utils;
 
-import com.dochero.departmentservice.client.dto.DepartmentDTO;
+import com.dochero.departmentservice.dto.DepartmentDTO;
 import com.dochero.departmentservice.department.entity.Department;
 import com.dochero.departmentservice.folder.entity.Folder;
 

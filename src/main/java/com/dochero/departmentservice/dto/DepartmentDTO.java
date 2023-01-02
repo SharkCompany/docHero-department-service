@@ -1,4 +1,4 @@
-package com.dochero.departmentservice.client.dto;
+package com.dochero.departmentservice.dto;
 
 
 import lombok.AllArgsConstructor;

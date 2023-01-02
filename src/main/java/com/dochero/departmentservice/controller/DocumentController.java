@@ -35,9 +35,10 @@ public class DocumentController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createDocument(@RequestBody @Valid CreateDocumentRequest request) {
+    public ResponseEntity<?> createDocument(@RequestBody @Valid CreateDocumentRequest request,
+                                            @RequestHeader(name = "Authorization", required = false) String credentials) {
         try {
-            return ResponseEntity.ok().body(documentService.createDocument(request));
+            return ResponseEntity.ok().body(documentService.createDocument(request, credentials));
         } catch (Exception e) {
             LOGGER.error("Failed to create document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());

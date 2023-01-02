@@ -1,5 +1,7 @@
 package com.dochero.departmentservice.common.service.impl;
 
+import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
+import com.dochero.departmentservice.client.service.AuthenticationClientService;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.document.entity.Document;
@@ -19,10 +21,13 @@ public class CommonFunctionServiceImpl implements CommonFunctionService {
     private final FolderRepository folderRepository;
     private final DocumentRepository documentRepository;
 
+    private final AuthenticationClientService authenticationClientService;
+
     @Autowired
-    public CommonFunctionServiceImpl(FolderRepository folderRepository, DocumentRepository documentRepository) {
+    public CommonFunctionServiceImpl(FolderRepository folderRepository, DocumentRepository documentRepository, AuthenticationClientService authenticationClientService) {
         this.folderRepository = folderRepository;
         this.documentRepository = documentRepository;
+        this.authenticationClientService = authenticationClientService;
     }
 
     @Override
@@ -45,5 +50,31 @@ public class CommonFunctionServiceImpl implements CommonFunctionService {
     public Folder getRootFolderByDepartmentId(String departmentId) {
         return folderRepository.findByDepartmentIdAndIsRootTrue(departmentId)
                 .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+    }
+
+    @Override
+    public ValidateTokenResponse checkUserIsValidAndReturnUserInfo(String departmentId, String credentials) {
+        ValidateTokenResponse validateTokenResponse = validateToken(credentials);
+        boolean isUserInDepartment = validateTokenResponse.getDepartmentIDs().stream().anyMatch(departmentId::equals);
+        if (!isUserInDepartment) {
+            throw new FolderException(AppMessage.USER_NOT_AUTHORIZE_TO_INTERACT_WITH_DOCUMENT);
+        } else {
+            return validateTokenResponse;
+        }
+    }
+
+    private ValidateTokenResponse validateToken(String token) {
+        String tokenString = removeBearerWord(token);
+        return authenticationClientService.validateToken(tokenString);
+    }
+
+    private String removeBearerWord(String bearerToken) {
+        if (StringUtils.isBlank(bearerToken)) {
+            return "";
+        }
+        if (bearerToken.startsWith("Bearer ")) {
+            return bearerToken.substring(7);
+        }
+        return bearerToken;
     }
 }
