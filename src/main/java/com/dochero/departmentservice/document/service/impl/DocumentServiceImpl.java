@@ -5,7 +5,6 @@ import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
 import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
 import com.dochero.departmentservice.client.service.AccountClientService;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
-import com.dochero.departmentservice.common.service.impl.CommonFunctionServiceImpl;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.entity.DocumentType;
@@ -129,19 +128,15 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request) {
+    public DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request, String credentials) {
         // Update document general information
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_NOT_FOUND_MESSAGE));
         Folder folder = folderRepository.findById(document.getReferenceFolderId())
                 .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
 
-        if (!document.getDocumentTitle().equals(request.getTitle())) {
-            if (isDocumentTitleExist(request.getTitle(), document.getDocumentType().getExtensionName(), folder.getDocuments())) {
-                throw new DocumentException(AppMessage.DOCUMENT_TITLE_EXIST_MESSAGE);
-            }
-            document.setDocumentTitle(request.getTitle());
-        }
+        ValidateTokenResponse userInfo = commonFunctionService
+                .checkUserIsValidAndReturnUserInfo(folder.getDepartmentId(), credentials);
 
         // Update document revision
         List<DocumentRevision> documentRevisions = documentRevisionFeignService.getDocumentRevisionByDocId(documentId);
@@ -149,14 +144,21 @@ public class DocumentServiceImpl implements DocumentService {
             UpdateRevisionRequest updateRevisionRequest = objectMapper.convertValue(request, UpdateRevisionRequest.class);
             DocumentRevision revisionForExistedDocument = documentRevisionFeignService.createDocumentRevision(documentId, updateRevisionRequest);
             documentRevisions.add(0, revisionForExistedDocument);
-        }
-        //Todo: Who made the changes?
-        Document savedDocument = documentRepository.save(document);
-        savedDocument.setRevisions(documentRevisions);
 
-        Map<String, UserDTO> mapUserDTOs = accountClientService.getAllUserDTOMap();
-        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document, mapUserDTOs);
-        return new DepartmentResponse(documentDTO, "Update document detail successfully");
+            if (!document.getDocumentTitle().equals(request.getTitle())) {
+                if (isDocumentTitleExist(request.getTitle(), document.getDocumentType().getExtensionName(), folder.getDocuments())) {
+                    throw new DocumentException(AppMessage.DOCUMENT_TITLE_EXIST_MESSAGE);
+                }
+                document.setDocumentTitle(request.getTitle());
+            }
+            document.setUpdatedBy(userInfo.getUserId());
+            document = documentRepository.save(document);
+            document.setRevisions(documentRevisions);
+        }
+
+        //This return data may not use because FE will call getDetail again after update!
+        DocumentCreateDTO documentCreateDTO = DocumentMapperUtils.mapDocumentToDocumentCreateDTO(document);
+        return new DepartmentResponse(documentCreateDTO, "Update document detail successfully");
     }
 
     @Override
