@@ -3,6 +3,8 @@ package com.dochero.departmentservice.document.service.impl;
 import com.dochero.departmentservice.client.DocumentRevisionClient;
 import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
 import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
+import com.dochero.departmentservice.client.service.AccountClientService;
+import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.common.service.impl.CommonFunctionServiceImpl;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.document.entity.Document;
@@ -15,6 +17,7 @@ import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.dto.DocumentCreateDTO;
 import com.dochero.departmentservice.dto.DocumentDTO;
 import com.dochero.departmentservice.dto.FolderItemsDTO;
+import com.dochero.departmentservice.dto.UserDTO;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentDetailRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentTitleRequest;
@@ -33,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -44,18 +48,21 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final DocumentRevisionFeignService documentRevisionFeignService;
 
-    private final CommonFunctionServiceImpl commonFunctionService;
+    private final CommonFunctionService commonFunctionService;
+
+    private final AccountClientService accountClientService;
 
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, CommonFunctionServiceImpl commonFunctionService, ObjectMapper objectMapper) {
+    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, CommonFunctionService commonFunctionService, AccountClientService accountClientService, ObjectMapper objectMapper) {
         this.documentRepository = documentRepository;
         this.folderRepository = folderRepository;
         this.documentTypeRepository = documentTypeRepository;
         this.documentRevisionClient = documentRevisionClient;
         this.documentRevisionFeignService = documentRevisionFeignService;
         this.commonFunctionService = commonFunctionService;
+        this.accountClientService = accountClientService;
         this.objectMapper = objectMapper;
     }
 
@@ -147,7 +154,8 @@ public class DocumentServiceImpl implements DocumentService {
         Document savedDocument = documentRepository.save(document);
         savedDocument.setRevisions(documentRevisions);
 
-        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document);
+        Map<String, UserDTO> mapUserDTOs = accountClientService.getAllUserDTOMap();
+        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document, mapUserDTOs);
         return new DepartmentResponse(documentDTO, "Update document detail successfully");
     }
 
@@ -161,7 +169,9 @@ public class DocumentServiceImpl implements DocumentService {
             documentRevisions.add(blankRevision);
         }
         document.setRevisions(documentRevisions);
-        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document);
+
+        Map<String, UserDTO> mapUserDTOs = accountClientService.getAllUserDTOMap();
+        DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document, mapUserDTOs);
         return new DepartmentResponse(documentDTO, "Get document detail successfully");
     }
 
