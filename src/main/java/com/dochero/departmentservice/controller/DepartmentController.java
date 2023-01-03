@@ -89,16 +89,5 @@ public class DepartmentController {
             return ResponseEntity.badRequest().body(body);
         }
     }
-    @GetMapping({"/{departmentId}/items-folder"})
-    public ResponseEntity<?> getFoldersInSameParent(@PathVariable("departmentId") String departmentId,
-                                                    @RequestParam(value = "folderId") String folderId) {
-        try {
-            return ResponseEntity.ok().body(folderService.getItemsInSameParentFolderId(departmentId, folderId));
-        } catch (Exception e) {
-            LOGGER.error("Failed to get folder in same parent. " + e);
-            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
-            return ResponseEntity.badRequest().body(body);
-        }
-    }
 
 }

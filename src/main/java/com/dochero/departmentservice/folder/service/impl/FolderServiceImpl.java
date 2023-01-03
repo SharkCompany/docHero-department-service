@@ -1,8 +1,8 @@
 package com.dochero.departmentservice.folder.service.impl;
 
+import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AppMessage;
-import com.dochero.departmentservice.department.entity.Department;
 import com.dochero.departmentservice.department.repository.DepartmentRepository;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
@@ -10,7 +10,6 @@ import com.dochero.departmentservice.dto.FolderItemsDTO;
 import com.dochero.departmentservice.dto.request.CreateFolderRequest;
 import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
-import com.dochero.departmentservice.exception.DepartmentException;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
@@ -31,26 +30,22 @@ public class FolderServiceImpl implements FolderService {
     private final FolderRepository folderRepository;
     private final DepartmentRepository departmentRepository;
     private final CommonFunctionService commonFunctionService;
+    private final DocumentRepository documentRepository;
     @Autowired
-    public FolderServiceImpl(FolderRepository folderRepository, DepartmentRepository departmentRepository, CommonFunctionService commonFunctionService) {
+    public FolderServiceImpl(FolderRepository folderRepository, DepartmentRepository departmentRepository, CommonFunctionService commonFunctionService, DocumentRepository documentRepository) {
         this.folderRepository = folderRepository;
         this.departmentRepository = departmentRepository;
         this.commonFunctionService = commonFunctionService;
+        this.documentRepository = documentRepository;
     }
 
     @Override
-    public DepartmentResponse getItemsInSameParentFolderId(String departmentId, String parentFolderId) {
-        Department department = departmentRepository.findById(departmentId)
-                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+    public DepartmentResponse getItemsInFolder(String folderId) {
+        Folder folder = folderRepository.findById(folderId)
+                .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
 
-        boolean isFolderExisted = folderRepository.existsById(parentFolderId);
-        if (!isFolderExisted && !StringUtils.isBlank(parentFolderId)) {
-            throw new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE);
-        }
-
-        List<Folder> folders = commonFunctionService
-                .getFoldersByParentFolderIdAndDepartment(parentFolderId, department.getId());
-        List<Document> documents = commonFunctionService.getDocumentsByParentFolderId(parentFolderId);
+        List<Folder> folders = folderRepository.findByParentFolderId(folder.getId());
+        List<Document> documents = documentRepository.findByReferenceFolderId(folder.getId());
 
         List<FolderItemsDTO> folderItemsDTOS = FolderItemMapperUtil.mapToFolderItemDTO(folders, documents);
         return new DepartmentResponse(folderItemsDTOS, "Get folders successfully");
@@ -58,23 +53,26 @@ public class FolderServiceImpl implements FolderService {
 
     @Override
     @Transactional
-    public DepartmentResponse createFolder(CreateFolderRequest request) {
-        Department department = departmentRepository.findById(request.getDepartmentId())
-                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+    public DepartmentResponse createFolder(CreateFolderRequest request, String credential) {
+        Folder parentFolder = folderRepository.findById(request.getParentFolderId())
+                .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
 
-        List<Folder> relatedFolders =commonFunctionService
-                .getFoldersByParentFolderIdAndDepartment(request.getParentFolderId(), department.getId());
-        if (isFolderNameExists(request.getFolderName(), relatedFolders)) {
+        //check if user is valid to create folder
+        ValidateTokenResponse validateTokenResponse =
+                commonFunctionService.checkUserIsValidAndReturnUserInfo(parentFolder.getDepartmentId(), credential);
+
+        List<Folder> folders = folderRepository.findByParentFolderId(parentFolder.getId());
+        if (isFolderNameExists(request.getFolderName(), folders)) {
             throw new FolderException(AppMessage.FOLDER_NAME_EXISTS_MESSAGE);
         }
 
         Folder folder = Folder.builder()
-                .departmentId(department.getId())
+                .departmentId(parentFolder.getDepartmentId())
+                .parentFolderId(parentFolder.getId())
                 .folderName(request.getFolderName())
-                .parentFolderId(request.getParentFolderId())
                 .isRoot(false)
+                .createdBy(validateTokenResponse.getUserId())
                 .build();
-        // Todo: set created by
         Folder savedFolder = folderRepository.save(folder);
         return new DepartmentResponse(savedFolder, "Create folder successfully");
     }
@@ -85,6 +83,8 @@ public class FolderServiceImpl implements FolderService {
         // If folder exists
         Folder folder = folderRepository.findById(folderId)
                 .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+
+        //What if folder move to folder in another department?
 
         if (folder.isRoot()) {
             throw new FolderException(AppMessage.FOLDER_CANNOT_DELETE_ROOT_MESSAGE);
