@@ -20,6 +20,4 @@ public class CreateFolderRequest {
     @NotBlank(message = "Parent folder id could not be blank")
     private String parentFolderId;
 
-    @NotBlank(message = "Department id could not be blanked")
-    private String departmentId;
 }

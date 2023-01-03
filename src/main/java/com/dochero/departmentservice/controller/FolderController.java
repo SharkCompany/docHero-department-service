@@ -35,9 +35,10 @@ public class FolderController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createFolder(@RequestBody @Valid CreateFolderRequest request) {
+    public ResponseEntity<?> createFolder(@RequestBody @Valid CreateFolderRequest request,
+                                          @RequestHeader(value = "Authorization", required = false) String credential) {
         try {
-            return ResponseEntity.ok().body(folderService.createFolder(request));
+            return ResponseEntity.ok().body(folderService.createFolder(request, credential));
         } catch (Exception e) {
             LOGGER.error("Failed to create folder. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
@@ -63,6 +64,17 @@ public class FolderController {
             return ResponseEntity.ok().body(folderService.deleteFolder(folderId));
         } catch (Exception e) {
             LOGGER.error("Failed to delete folder. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
+    @GetMapping({"/{folderId}"})
+    public ResponseEntity<?> geteItemsInFolder(@PathVariable("folderId") String folderId) {
+        try {
+            return ResponseEntity.ok().body(folderService.getItemsInFolder(folderId));
+        } catch (Exception e) {
+            LOGGER.error("Failed to get folder in same parent. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }

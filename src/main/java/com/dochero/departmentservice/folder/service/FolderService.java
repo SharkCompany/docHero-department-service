@@ -6,9 +6,9 @@ import com.dochero.departmentservice.dto.response.DepartmentResponse;
 
 public interface FolderService {
 
-    DepartmentResponse getItemsInSameParentFolderId(String departmentId, String parentFolderId);
+    DepartmentResponse getItemsInFolder(String folderId);
 
-    DepartmentResponse createFolder(CreateFolderRequest request);
+    DepartmentResponse createFolder(CreateFolderRequest request, String credential);
 
     DepartmentResponse updateFolder(String folderId ,UpdateFolderRequest request);
 
