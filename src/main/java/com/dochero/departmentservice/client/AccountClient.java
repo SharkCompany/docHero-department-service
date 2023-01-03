@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 import java.util.List;
 
-@FeignClient(name = "account-service", url = "http://103.48.192.223:40002")
-//@FeignClient(name = "account-service", path = "/account")
+//@FeignClient(name = "account-service", url = "http://103.48.192.223:40002")
+@FeignClient(name = "account-service", path = "/account")
 public interface AccountClient {
 
     @GetMapping("/accounts")
