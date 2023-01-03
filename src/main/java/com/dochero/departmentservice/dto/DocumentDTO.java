@@ -22,9 +22,9 @@ public class DocumentDTO {
 
     private String documentTitle;
 
-    private String createdBy;
+    private UserDTO createdBy;
 
-    private String updatedBy;
+    private UserDTO updatedBy;
 
     private Timestamp deletedAt;
 

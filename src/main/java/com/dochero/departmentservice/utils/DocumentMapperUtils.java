@@ -1,18 +1,17 @@
 package com.dochero.departmentservice.utils;
 
 import com.dochero.departmentservice.document.entity.Document;
-import com.dochero.departmentservice.dto.DocumentCreateDTO;
-import com.dochero.departmentservice.dto.DepartmentInDocumentDTO;
-import com.dochero.departmentservice.dto.DocumentDTO;
-import com.dochero.departmentservice.dto.FolderInDocumentDTO;
+import com.dochero.departmentservice.dto.*;
+
+import java.util.Map;
 
 public class DocumentMapperUtils {
-    public static DocumentDTO mapDocumentToDocumentDTO(Document document) {
+    public static DocumentDTO mapDocumentToDocumentDTO(Document document, Map<String, UserDTO> userDTOMap) {
         return DocumentDTO.builder()
                 .id(document.getId())
                 .documentTitle(document.getDocumentTitle())
-                .createdBy(document.getCreatedBy())
-                .updatedBy(document.getUpdatedBy())
+                .createdBy(userDTOMap.getOrDefault(document.getCreatedBy(), null))
+                .updatedBy(userDTOMap.getOrDefault(document.getUpdatedBy(), null))
                 .deletedAt(document.getDeletedAt())
                 .createdAt(document.getCreatedAt())
                 .updatedAt(document.getUpdatedAt())

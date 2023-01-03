@@ -1,11 +1,13 @@
 package com.dochero.departmentservice.common.service.impl;
 
 import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
+import com.dochero.departmentservice.client.service.AccountClientService;
 import com.dochero.departmentservice.client.service.AuthenticationClientService;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
+import com.dochero.departmentservice.dto.UserDTO;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
@@ -15,12 +17,14 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class CommonFunctionServiceImpl implements CommonFunctionService {
     private final FolderRepository folderRepository;
     private final DocumentRepository documentRepository;
-
     private final AuthenticationClientService authenticationClientService;
 
     @Autowired
