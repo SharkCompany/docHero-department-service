@@ -11,7 +11,7 @@ public interface DocumentService {
 
     DepartmentResponse updateDocumentTitle(String documentId , UpdateDocumentTitleRequest request);
 
-    DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request);
+    DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request, String credentials);
 
     DepartmentResponse getDocumentDetail(String documentId);
 
