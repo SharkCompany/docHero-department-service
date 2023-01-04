@@ -1,44 +1,58 @@
 package com.dochero.departmentservice.utils;
 
 import com.dochero.departmentservice.document.entity.Document;
-import com.dochero.departmentservice.dto.FolderItemsDTO;
+import com.dochero.departmentservice.dto.FolderItemDTO;
+import com.dochero.departmentservice.dto.ItemDTO;
+import com.dochero.departmentservice.dto.UserDTO;
 import com.dochero.departmentservice.folder.entity.Folder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class FolderItemMapperUtil {
     private FolderItemMapperUtil() {}
 
-    public static FolderItemsDTO mapFolderToFolderItemsDTO(Folder folder) {
-        return FolderItemsDTO.builder()
+    public static ItemDTO mapFolderToItemsDTO(Folder folder, Map<String, UserDTO> userDTOMap) {
+        return ItemDTO.builder()
                 .itemId(folder.getId())
                 .itemTitle(folder.getFolderName())
                 .isFolder(true)
                 .createdAt(folder.getCreatedAt())
                 .updatedAt(folder.getUpdatedAt())
-                .createdBy(folder.getCreatedBy())
-                .updatedBy(folder.getUpdatedBy())
+                .createdBy(userDTOMap.getOrDefault(folder.getCreatedBy(), null))
+                .updatedBy(userDTOMap.getOrDefault(folder.getUpdatedBy(), null))
                 .build();
     }
 
-    public static FolderItemsDTO mapDocumentToFolderItemsDTO(Document document) {
-        return FolderItemsDTO.builder()
+    public static ItemDTO mapDocumentToItemsDTO(Document document, Map<String, UserDTO> userDTOMap) {
+        return ItemDTO.builder()
                 .itemId(document.getId())
                 .itemTitle(document.getDocumentTitle())
                 .isFolder(false)
                 .extension(document.getDocumentType().getExtensionName())
                 .createdAt(document.getCreatedAt())
                 .updatedAt(document.getUpdatedAt())
-                .createdBy(document.getCreatedBy())
-                .updatedBy(document.getUpdatedBy())
+                .createdBy(userDTOMap.getOrDefault(document.getCreatedBy(), null))
+                .updatedBy(userDTOMap.getOrDefault(document.getUpdatedBy(), null))
                 .build();
     }
 
-    public static List<FolderItemsDTO> mapToFolderItemDTO(List<Folder> folders, List<Document> documents) {
-        List<FolderItemsDTO> items = new ArrayList<>();
-        folders.forEach(folder -> items.add(mapFolderToFolderItemsDTO(folder)));
-        documents.forEach(document -> items.add(mapDocumentToFolderItemsDTO(document)));
+    public static List<ItemDTO> mapToItemDTO(List<Folder> folders, List<Document> documents, Map<String, UserDTO> mapUserDTOs) {
+        List<ItemDTO> items = new ArrayList<>();
+        folders.forEach(folder -> items.add(mapFolderToItemsDTO(folder, mapUserDTOs)));
+        documents.forEach(document -> items.add(mapDocumentToItemsDTO(document, mapUserDTOs)));
         return items;
     }
+
+    public static FolderItemDTO mapToFolderItemDTO(List<ItemDTO> items, Folder folder) {
+        return FolderItemDTO.builder()
+                .folderId(folder.getId())
+                .folderName(folder.getFolderName())
+                .departmentId(folder.getDepartmentId())
+                .listItems(items)
+                .build();
+    }
+
+
 }

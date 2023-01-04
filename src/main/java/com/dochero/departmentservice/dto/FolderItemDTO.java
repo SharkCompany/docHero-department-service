@@ -5,15 +5,15 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Data
 @Builder
-public class DocumentCreateDTO {
-    private String id;
-    private String documentTitle;
+public class FolderItemDTO {
     private String folderId;
-    private String documentTypeId;
+    private String folderName;
     private String departmentId;
-    private String createdBy;
+    private List<ItemDTO> listItems;
 }

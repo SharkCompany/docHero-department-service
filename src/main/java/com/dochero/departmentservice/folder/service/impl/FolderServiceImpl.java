@@ -1,12 +1,15 @@
 package com.dochero.departmentservice.folder.service.impl;
 
 import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
+import com.dochero.departmentservice.client.service.AccountClientService;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AppMessage;
 import com.dochero.departmentservice.department.repository.DepartmentRepository;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
-import com.dochero.departmentservice.dto.FolderItemsDTO;
+import com.dochero.departmentservice.dto.FolderItemDTO;
+import com.dochero.departmentservice.dto.ItemDTO;
+import com.dochero.departmentservice.dto.UserDTO;
 import com.dochero.departmentservice.dto.request.CreateFolderRequest;
 import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
@@ -24,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class FolderServiceImpl implements FolderService {
@@ -31,24 +35,31 @@ public class FolderServiceImpl implements FolderService {
     private final DepartmentRepository departmentRepository;
     private final CommonFunctionService commonFunctionService;
     private final DocumentRepository documentRepository;
+    private final AccountClientService accountClientService;
     @Autowired
-    public FolderServiceImpl(FolderRepository folderRepository, DepartmentRepository departmentRepository, CommonFunctionService commonFunctionService, DocumentRepository documentRepository) {
+    public FolderServiceImpl(FolderRepository folderRepository, DepartmentRepository departmentRepository, CommonFunctionService commonFunctionService, DocumentRepository documentRepository, AccountClientService accountClientService) {
         this.folderRepository = folderRepository;
         this.departmentRepository = departmentRepository;
         this.commonFunctionService = commonFunctionService;
         this.documentRepository = documentRepository;
+        this.accountClientService = accountClientService;
     }
 
     @Override
-    public DepartmentResponse getItemsInFolder(String folderId) {
+    public DepartmentResponse getItemsInFolder(String folderId, String credential) {
         Folder folder = folderRepository.findById(folderId)
                 .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+
+        commonFunctionService.checkUserIsValidAndReturnUserInfo(folder.getDepartmentId(), credential);
+
+        Map<String, UserDTO> mapUserDTOs = accountClientService.getAllUserDTOMap();
 
         List<Folder> folders = folderRepository.findByParentFolderId(folder.getId());
         List<Document> documents = documentRepository.findByReferenceFolderId(folder.getId());
 
-        List<FolderItemsDTO> folderItemsDTOS = FolderItemMapperUtil.mapToFolderItemDTO(folders, documents);
-        return new DepartmentResponse(folderItemsDTOS, "Get folders successfully");
+        List<ItemDTO> itemDTOS = FolderItemMapperUtil.mapToItemDTO(folders, documents, mapUserDTOs);
+        FolderItemDTO result = FolderItemMapperUtil.mapToFolderItemDTO(itemDTOS, folder);
+        return new DepartmentResponse(result, "Get folders successfully");
     }
 
     @Override
@@ -72,6 +83,7 @@ public class FolderServiceImpl implements FolderService {
                 .folderName(request.getFolderName())
                 .isRoot(false)
                 .createdBy(validateTokenResponse.getUserId())
+                .updatedBy(validateTokenResponse.getUserId())
                 .build();
         Folder savedFolder = folderRepository.save(folder);
         return new DepartmentResponse(savedFolder, "Create folder successfully");

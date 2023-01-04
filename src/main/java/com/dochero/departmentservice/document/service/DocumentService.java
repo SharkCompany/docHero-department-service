@@ -9,7 +9,7 @@ public interface DocumentService {
 
     DepartmentResponse createDocument(CreateDocumentRequest request, String credentials);
 
-    DepartmentResponse updateDocumentTitle(String documentId , UpdateDocumentTitleRequest request);
+    DepartmentResponse updateDocumentTitle(String documentId , UpdateDocumentTitleRequest request, String credentials);
 
     DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request, String credentials);
 

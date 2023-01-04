@@ -6,7 +6,7 @@ import com.dochero.departmentservice.dto.response.DepartmentResponse;
 
 public interface FolderService {
 
-    DepartmentResponse getItemsInFolder(String folderId);
+    DepartmentResponse getItemsInFolder(String folderId, String credential);
 
     DepartmentResponse createFolder(CreateFolderRequest request, String credential);
 
