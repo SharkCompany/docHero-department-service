@@ -11,13 +11,13 @@ import java.sql.Timestamp;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FolderItemsDTO {
+public class ItemDTO {
     private String itemId;
     private String itemTitle;
     private Boolean isFolder;
     private String extension;
     private Timestamp createdAt;
     private Timestamp updatedAt;
-    private String createdBy;
-    private String updatedBy;
+    private UserDTO createdBy;
+    private UserDTO updatedBy;
 }

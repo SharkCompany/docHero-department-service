@@ -70,9 +70,10 @@ public class FolderController {
     }
 
     @GetMapping({"/{folderId}"})
-    public ResponseEntity<?> geteItemsInFolder(@PathVariable("folderId") String folderId) {
+    public ResponseEntity<?> getItemsInFolder(@PathVariable("folderId") String folderId,
+                                              @RequestHeader(value = "Authorization", required = false) String credential) {
         try {
-            return ResponseEntity.ok().body(folderService.getItemsInFolder(folderId));
+            return ResponseEntity.ok().body(folderService.getItemsInFolder(folderId, credential));
         } catch (Exception e) {
             LOGGER.error("Failed to get folder in same parent. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());

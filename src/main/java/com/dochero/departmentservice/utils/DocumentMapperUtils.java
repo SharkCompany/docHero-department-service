@@ -35,8 +35,8 @@ public class DocumentMapperUtils {
     }
 
     //Map Document to DocumentCreateDTO
-    public static DocumentCreateDTO mapDocumentToDocumentCreateDTO(Document document) {
-        return DocumentCreateDTO.builder()
+    public static DocumentBasicDTO mapDocumentToDocumentBasicDTO(Document document) {
+        return DocumentBasicDTO.builder()
                 .id(document.getId())
                 .documentTitle(document.getDocumentTitle())
                 .createdBy(document.getCreatedBy())

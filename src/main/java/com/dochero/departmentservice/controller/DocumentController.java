@@ -48,9 +48,10 @@ public class DocumentController {
 
     @PutMapping("/{documentId}")
     public ResponseEntity<?> updateDocumentTitle(@PathVariable("documentId") String documentId,
-                                                 @RequestBody @Valid UpdateDocumentTitleRequest request) {
+                                                 @RequestBody @Valid UpdateDocumentTitleRequest request,
+                                                 @RequestHeader(value = "Authorization", required = false) String credentials) {
         try {
-            return ResponseEntity.ok().body(documentService.updateDocumentTitle(documentId, request));
+            return ResponseEntity.ok().body(documentService.updateDocumentTitle(documentId, request, credentials));
         } catch (Exception e) {
             LOGGER.error("Failed to update document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());

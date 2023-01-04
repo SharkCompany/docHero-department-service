@@ -13,9 +13,8 @@ import com.dochero.departmentservice.document.repository.DocumentTypeRepository;
 import com.dochero.departmentservice.client.service.DocumentRevisionFeignService;
 import com.dochero.departmentservice.document.service.DocumentService;
 import com.dochero.departmentservice.client.dto.DocumentRevision;
-import com.dochero.departmentservice.dto.DocumentCreateDTO;
+import com.dochero.departmentservice.dto.DocumentBasicDTO;
 import com.dochero.departmentservice.dto.DocumentDTO;
-import com.dochero.departmentservice.dto.FolderItemsDTO;
 import com.dochero.departmentservice.dto.UserDTO;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentDetailRequest;
@@ -26,7 +25,6 @@ import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
 import com.dochero.departmentservice.utils.DocumentMapperUtils;
-import com.dochero.departmentservice.utils.FolderItemMapperUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,7 +93,7 @@ public class DocumentServiceImpl implements DocumentService {
         DocumentRevision blankRevision = documentRevisionClient.createBlankRevision(saveDocument.getId());
         saveDocument.setRevisions(List.of(blankRevision));
 
-        DocumentCreateDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentCreateDTO(document);
+        DocumentBasicDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentBasicDTO(document);
         return new DepartmentResponse(documentDTO, "Create document successfully");
     }
 
@@ -103,11 +101,14 @@ public class DocumentServiceImpl implements DocumentService {
 
     @Override
     @Transactional
-    public DepartmentResponse updateDocumentTitle(String documentId, UpdateDocumentTitleRequest request) {
+    public DepartmentResponse updateDocumentTitle(String documentId, UpdateDocumentTitleRequest request, String credentials) {
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_NOT_FOUND_MESSAGE));
         Folder folder = folderRepository.findById(request.getFolderId())
                 .orElseThrow(() -> new FolderException(AppMessage.FOLDER_NOT_FOUND_MESSAGE));
+
+        ValidateTokenResponse userInfo = commonFunctionService
+                .checkUserIsValidAndReturnUserInfo(document.getReferenceDepartmentId(), credentials);
 
         // if request title or request folder is different from current document
         if (!request.getTitle().equals(document.getDocumentTitle())
@@ -116,14 +117,13 @@ public class DocumentServiceImpl implements DocumentService {
            if (isDocumentTitleExist(request.getTitle(), extensionName, folder.getDocuments())) {
                throw new DocumentException(AppMessage.DOCUMENT_TITLE_EXIST_MESSAGE);
            }
-
             document.setDocumentTitle(request.getTitle());
             document.setReferenceFolderId(request.getFolderId());
-            //Todo: who made the changes
+            document.setUpdatedBy(userInfo.getUserId());
+            document = documentRepository.save(document);
         }
-        Document saveDocument = documentRepository.save(document);
-        FolderItemsDTO folderItemsDTO = FolderItemMapperUtil.mapDocumentToFolderItemsDTO(saveDocument);
-        return new DepartmentResponse(folderItemsDTO, "Update document successfully");
+        DocumentBasicDTO documentBasicDTO = DocumentMapperUtils.mapDocumentToDocumentBasicDTO(document);
+        return new DepartmentResponse(documentBasicDTO, "Update document successfully");
     }
 
     @Override
@@ -157,8 +157,8 @@ public class DocumentServiceImpl implements DocumentService {
         }
 
         //This return data may not use because FE will call getDetail again after update!
-        DocumentCreateDTO documentCreateDTO = DocumentMapperUtils.mapDocumentToDocumentCreateDTO(document);
-        return new DepartmentResponse(documentCreateDTO, "Update document detail successfully");
+        DocumentBasicDTO documentBasicDTO = DocumentMapperUtils.mapDocumentToDocumentBasicDTO(document);
+        return new DepartmentResponse(documentBasicDTO, "Update document detail successfully");
     }
 
     @Override
