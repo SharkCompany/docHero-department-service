@@ -30,7 +30,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -171,8 +170,8 @@ public class FolderServiceImpl implements FolderService {
 
     private FolderTreeDTO createFolderTreeRecursive(Folder folder, FolderTreeDTO result) {
         if (!folder.getSubFolders().isEmpty()) {
-            result.setId(folder.getId());
-            result.setFolderName(folder.getFolderName());
+            result.setKey(folder.getId());
+            result.setTitle(folder.getFolderName());
             result.setIsRoot(folder.isRoot());
 
             List<FolderTreeDTO> subFolderTreeDTOS = new ArrayList<>();
@@ -183,8 +182,8 @@ public class FolderServiceImpl implements FolderService {
             });
             result.setChildren(subFolderTreeDTOS);
         } else {
-            result.setId(folder.getId());
-            result.setFolderName(folder.getFolderName());
+            result.setKey(folder.getId());
+            result.setTitle(folder.getFolderName());
             result.setChildren(new ArrayList<>());
             result.setIsRoot(folder.isRoot());
         }

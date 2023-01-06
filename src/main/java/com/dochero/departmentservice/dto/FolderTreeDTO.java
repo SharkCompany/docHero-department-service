@@ -12,8 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class FolderTreeDTO {
-    private String id;
-    private String folderName;
+    private String key;
+    private String title;
     private Boolean isRoot;
     private List<FolderTreeDTO> children;
 }
