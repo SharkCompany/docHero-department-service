@@ -157,18 +157,18 @@ public class FolderServiceImpl implements FolderService {
     }
 
     @Override
-    public DepartmentResponse getFolderTreeOfDepartment(String departmentId) {
+    public DepartmentResponse getFolderTreeOfDepartment(String departmentId, String excludedId) {
         Department department = departmentRepository.findById(departmentId)
                 .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
 
         Folder folder = department.getRootFolder().get(0);
         FolderTreeDTO folderTreeDTO = new FolderTreeDTO();
 
-        createFolderTreeRecursive(folder, folderTreeDTO);
+        createFolderTreeRecursive(folder, folderTreeDTO, excludedId);
         return new DepartmentResponse(folderTreeDTO, "Get folder tree of department successfully");
     }
 
-    private FolderTreeDTO createFolderTreeRecursive(Folder folder, FolderTreeDTO result) {
+    private FolderTreeDTO createFolderTreeRecursive(Folder folder, FolderTreeDTO result, String excludedId) {
         if (!folder.getSubFolders().isEmpty()) {
             result.setKey(folder.getId());
             result.setTitle(folder.getFolderName());
@@ -176,9 +176,11 @@ public class FolderServiceImpl implements FolderService {
 
             List<FolderTreeDTO> subFolderTreeDTOS = new ArrayList<>();
             folder.getSubFolders().forEach(subFolder -> {
-                FolderTreeDTO subFolderTreeDTO = new FolderTreeDTO();
-                FolderTreeDTO folderTreeRecursive = createFolderTreeRecursive(subFolder, subFolderTreeDTO);
-                subFolderTreeDTOS.add(folderTreeRecursive);
+                if(!subFolder.getId().equalsIgnoreCase(excludedId)) {
+                    FolderTreeDTO subFolderTreeDTO = new FolderTreeDTO();
+                    FolderTreeDTO folderTreeRecursive = createFolderTreeRecursive(subFolder, subFolderTreeDTO, excludedId);
+                    subFolderTreeDTOS.add(folderTreeRecursive);
+                }
             });
             result.setChildren(subFolderTreeDTOS);
         } else {

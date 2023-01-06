@@ -14,7 +14,7 @@ public interface FolderService {
 
     DepartmentResponse deleteFolder(String folderId);
 
-    DepartmentResponse getFolderTreeOfDepartment(String departmentId);
+    DepartmentResponse getFolderTreeOfDepartment(String departmentId, String excludedId);
 
 
 }

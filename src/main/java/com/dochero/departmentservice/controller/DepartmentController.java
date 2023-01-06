@@ -91,9 +91,9 @@ public class DepartmentController {
     }
 
     @GetMapping("/{departmentId}/folder-tree")
-    public ResponseEntity<?> getFolderTreeOfDepartment(@PathVariable("departmentId") String departmentId) {
+    public ResponseEntity<?> getFolderTreeOfDepartment(@PathVariable("departmentId") String departmentId, @RequestParam("excludedId") String excludedId) {
         try {
-            return ResponseEntity.ok().body(folderService.getFolderTreeOfDepartment(departmentId));
+            return ResponseEntity.ok().body(folderService.getFolderTreeOfDepartment(departmentId, excludedId));
         } catch (Exception e) {
             LOGGER.error("Failed to get tree folder. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
