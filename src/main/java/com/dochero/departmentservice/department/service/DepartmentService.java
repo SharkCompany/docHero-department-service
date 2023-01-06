@@ -14,4 +14,5 @@ public interface DepartmentService {
     DepartmentResponse getDepartmentById(String departmentId);
 
     DepartmentResponse getAllDepartments();
+
 }

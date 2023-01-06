@@ -4,15 +4,18 @@ import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
 import com.dochero.departmentservice.client.service.AccountClientService;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AppMessage;
+import com.dochero.departmentservice.department.entity.Department;
 import com.dochero.departmentservice.department.repository.DepartmentRepository;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.dto.FolderItemDTO;
+import com.dochero.departmentservice.dto.FolderTreeDTO;
 import com.dochero.departmentservice.dto.ItemDTO;
 import com.dochero.departmentservice.dto.UserDTO;
 import com.dochero.departmentservice.dto.request.CreateFolderRequest;
 import com.dochero.departmentservice.dto.request.UpdateFolderRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
+import com.dochero.departmentservice.exception.DepartmentException;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
@@ -26,6 +29,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -150,6 +155,40 @@ public class FolderServiceImpl implements FolderService {
         );
         folderRepository.saveAll(allSubFolders);
         return new DepartmentResponse(null, "Delete folder successfully");
+    }
+
+    @Override
+    public DepartmentResponse getFolderTreeOfDepartment(String departmentId) {
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+
+        Folder folder = department.getRootFolder().get(0);
+        FolderTreeDTO folderTreeDTO = new FolderTreeDTO();
+
+        createFolderTreeRecursive(folder, folderTreeDTO);
+        return new DepartmentResponse(folderTreeDTO, "Get folder tree of department successfully");
+    }
+
+    private FolderTreeDTO createFolderTreeRecursive(Folder folder, FolderTreeDTO result) {
+        if (!folder.getSubFolders().isEmpty()) {
+            result.setId(folder.getId());
+            result.setFolderName(folder.getFolderName());
+            result.setIsRoot(folder.isRoot());
+
+            List<FolderTreeDTO> subFolderTreeDTOS = new ArrayList<>();
+            folder.getSubFolders().forEach(subFolder -> {
+                FolderTreeDTO subFolderTreeDTO = new FolderTreeDTO();
+                FolderTreeDTO folderTreeRecursive = createFolderTreeRecursive(subFolder, subFolderTreeDTO);
+                subFolderTreeDTOS.add(folderTreeRecursive);
+            });
+            result.setChildren(subFolderTreeDTOS);
+        } else {
+            result.setId(folder.getId());
+            result.setFolderName(folder.getFolderName());
+            result.setChildren(new ArrayList<>());
+            result.setIsRoot(folder.isRoot());
+        }
+        return result;
     }
 
     private boolean isFolderNameExists(String folderName, List<Folder> subFolders) {
