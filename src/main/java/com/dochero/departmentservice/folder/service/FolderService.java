@@ -14,6 +14,7 @@ public interface FolderService {
 
     DepartmentResponse deleteFolder(String folderId);
 
-//    DepartmentResponse getAbsolutePath(String name, boolean isFolder);
+    DepartmentResponse getFolderTreeOfDepartment(String departmentId);
+
 
 }

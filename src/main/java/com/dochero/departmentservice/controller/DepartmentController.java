@@ -90,4 +90,15 @@ public class DepartmentController {
         }
     }
 
+    @GetMapping("/{departmentId}/folder-tree")
+    public ResponseEntity<?> getFolderTreeOfDepartment(@PathVariable("departmentId") String departmentId) {
+        try {
+            return ResponseEntity.ok().body(folderService.getFolderTreeOfDepartment(departmentId));
+        } catch (Exception e) {
+            LOGGER.error("Failed to get tree folder. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
 }
