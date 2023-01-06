@@ -15,6 +15,7 @@ public class ItemDTO {
     private String itemId;
     private String itemTitle;
     private Boolean isFolder;
+    private String parentFolderId;
     private String extension;
     private Timestamp createdAt;
     private Timestamp updatedAt;
