@@ -8,6 +8,7 @@ import com.dochero.departmentservice.dto.response.DepartmentResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -89,6 +90,23 @@ public class DocumentController {
             return ResponseEntity.ok().body(documentService.deleteDocument(documentId));
         } catch (Exception e) {
             LOGGER.error("Failed to delete document. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getAllDocuments(@RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
+                                             @RequestParam(name="record", required = false, defaultValue = "10") Integer record,
+                                             @RequestParam(name = "sortBy", required = false) String sortBy,
+                                             @RequestParam(name = "sortOrder", required = false) String sortOrder,
+                                             @RequestParam(name = "searchField", required = false) String searchField,
+                                             @RequestParam(name = "searchValue", required = false) String searchValue,
+                                             @RequestHeader(name = HttpHeaders.AUTHORIZATION, required = false) String credentials) {
+        try {
+            return ResponseEntity.ok().body(documentService.getAllDocuments(page, record, sortBy, sortOrder, searchField, searchValue, credentials));
+        } catch (Exception e) {
+            LOGGER.error("Failed to get all document. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }

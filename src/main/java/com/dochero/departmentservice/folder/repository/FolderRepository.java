@@ -13,4 +13,6 @@ public interface FolderRepository extends JpaRepository<Folder, String>, JpaSpec
     Optional<Folder> findByDepartmentIdAndIsRootTrue(String departmentId);
     Optional<Folder> findByIdAndDepartmentId(String folderId, String departmentId);
     List<Folder> findByParentFolderId(String parentFolderId);
+
+    List<Folder> findByDepartmentId(String departmentId);
 }

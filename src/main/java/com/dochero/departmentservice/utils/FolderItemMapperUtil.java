@@ -9,6 +9,7 @@ import com.dochero.departmentservice.folder.entity.Folder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class FolderItemMapperUtil {
     private FolderItemMapperUtil() {}
@@ -56,5 +57,8 @@ public class FolderItemMapperUtil {
                 .build();
     }
 
+    public static List<ItemDTO> mapListDocumentsToListItemDTO(List<Document> documents, Map<String, UserDTO> mapUserDTOs) {
+        return documents.stream().map(document -> mapDocumentToItemsDTO(document, mapUserDTOs)).collect(Collectors.toList());
+    }
 
 }

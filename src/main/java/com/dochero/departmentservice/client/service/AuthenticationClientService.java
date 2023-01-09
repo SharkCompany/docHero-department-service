@@ -6,7 +6,7 @@ import javax.ws.rs.PathParam;
 
 public interface AuthenticationClientService {
 
-    ValidateTokenResponse validateToken(String token);
+    ValidateTokenResponse validateToken(String credentials);
 
     String testAuthService();
 }
