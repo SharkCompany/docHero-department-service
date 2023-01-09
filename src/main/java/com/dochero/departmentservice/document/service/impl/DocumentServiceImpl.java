@@ -1,21 +1,21 @@
 package com.dochero.departmentservice.document.service.impl;
 
 import com.dochero.departmentservice.client.DocumentRevisionClient;
+import com.dochero.departmentservice.client.dto.DocumentRevision;
 import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
 import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
 import com.dochero.departmentservice.client.service.AccountClientService;
+import com.dochero.departmentservice.client.service.AuthenticationClientService;
+import com.dochero.departmentservice.client.service.DocumentRevisionFeignService;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AppMessage;
+import com.dochero.departmentservice.constant.SearchOperation;
 import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.document.entity.DocumentType;
 import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.document.repository.DocumentTypeRepository;
-import com.dochero.departmentservice.client.service.DocumentRevisionFeignService;
 import com.dochero.departmentservice.document.service.DocumentService;
-import com.dochero.departmentservice.client.dto.DocumentRevision;
-import com.dochero.departmentservice.dto.DocumentBasicDTO;
-import com.dochero.departmentservice.dto.DocumentDTO;
-import com.dochero.departmentservice.dto.UserDTO;
+import com.dochero.departmentservice.dto.*;
 import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentDetailRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentTitleRequest;
@@ -24,9 +24,17 @@ import com.dochero.departmentservice.exception.DocumentException;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
+import com.dochero.departmentservice.search.DocumentSpecification;
 import com.dochero.departmentservice.utils.DocumentMapperUtils;
+import com.dochero.departmentservice.utils.FolderItemMapperUtil;
+import com.dochero.departmentservice.utils.QueryParamUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -49,10 +57,12 @@ public class DocumentServiceImpl implements DocumentService {
 
     private final AccountClientService accountClientService;
 
+    private final AuthenticationClientService authenticationClientService;
+
     private final ObjectMapper objectMapper;
 
     @Autowired
-    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, CommonFunctionService commonFunctionService, AccountClientService accountClientService, ObjectMapper objectMapper) {
+    public DocumentServiceImpl(DocumentRepository documentRepository, FolderRepository folderRepository, DocumentTypeRepository documentTypeRepository, DocumentRevisionClient documentRevisionClient, DocumentRevisionFeignService documentRevisionFeignService, CommonFunctionService commonFunctionService, AccountClientService accountClientService, AuthenticationClientService authenticationClientService, ObjectMapper objectMapper) {
         this.documentRepository = documentRepository;
         this.folderRepository = folderRepository;
         this.documentTypeRepository = documentTypeRepository;
@@ -60,6 +70,7 @@ public class DocumentServiceImpl implements DocumentService {
         this.documentRevisionFeignService = documentRevisionFeignService;
         this.commonFunctionService = commonFunctionService;
         this.accountClientService = accountClientService;
+        this.authenticationClientService = authenticationClientService;
         this.objectMapper = objectMapper;
     }
 
@@ -186,6 +197,51 @@ public class DocumentServiceImpl implements DocumentService {
         document.setDeletedAt(Timestamp.from(Instant.now()));
         //Todo: who made the changes
         return new DepartmentResponse(null, "Delete document successfully");
+    }
+
+    @Override
+    public DepartmentResponse getAllDocuments(Integer page, Integer record, String sortBy, String sortOrder, String searchField, String searchValue, String credentials) {
+        authenticationClientService.validateToken(credentials);
+
+        Map<String, UserDTO> userDTOMap = accountClientService.getAllUserDTOMap();
+
+        if (StringUtils.isBlank(sortBy)) {
+            sortBy = "createdAt";
+            sortOrder = Sort.Direction.DESC.name();
+        }
+        Sort sort = QueryParamUtil.getSortOrder(sortBy, sortOrder);
+
+        Pageable pageable = QueryParamUtil.getPaginationOrder(page, record, sort);
+
+        Specification specs = null;
+        Page result;
+        if (StringUtils.isNotBlank(searchField) && StringUtils.isNotBlank(searchValue)) {
+            if ("title".equalsIgnoreCase(searchField)) {
+                specs = DocumentSpecification.getSearchSpec("documentTitle", SearchOperation.LIKE, searchValue);
+            } else if ("department".equalsIgnoreCase(searchField)) {
+                specs = DocumentSpecification.getSearchSpec("referenceDepartmentId", SearchOperation.EQUAL, searchValue);
+            }
+        }
+
+        if (specs == null) {
+            result = documentRepository.findAll(pageable);
+        } else {
+            result = documentRepository.findAll(specs, pageable);
+        }
+
+        List<Document> records = result.toList();
+        long totalItem = result.getTotalElements();
+        List<ItemDTO> itemDTOS = FolderItemMapperUtil.mapListDocumentsToListItemDTO(records, userDTOMap);
+
+        PaginationItemDTO paginationItemDTO = PaginationItemDTO.builder()
+                .totalItems((int) totalItem)
+                .currentItemCount(records.size())
+                .itemsPerPage(pageable.getPageSize())
+                .pageIndex(pageable.getPageNumber())
+                .items(itemDTOS)
+                .build();
+
+        return new DepartmentResponse(paginationItemDTO, "Get all documents successfully");
     }
 
     private boolean isDocumentTitleExist(String title, String extension, List<Document> documents) {

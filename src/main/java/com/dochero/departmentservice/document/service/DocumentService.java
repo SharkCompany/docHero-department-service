@@ -17,4 +17,5 @@ public interface DocumentService {
 
     DepartmentResponse deleteDocument(String documentId);
 
+    DepartmentResponse getAllDocuments(Integer page, Integer record, String sortBy, String sortOrder, String searchField, String searchValue, String credentials);
 }

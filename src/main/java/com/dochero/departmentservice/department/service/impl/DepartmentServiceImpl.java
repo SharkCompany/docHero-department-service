@@ -1,5 +1,6 @@
 package com.dochero.departmentservice.department.service.impl;
 
+import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.dto.DepartmentDTO;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AdministratorConstants;
@@ -33,11 +34,14 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final FolderRepository folderRepository;
     private final CommonFunctionService commonFunctionService;
 
+    private final DocumentRepository documentRepository;
+
     @Autowired
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository, FolderRepository folderRepository, CommonFunctionService commonFunctionService) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, FolderRepository folderRepository, CommonFunctionService commonFunctionService, DocumentRepository documentRepository) {
         this.departmentRepository = departmentRepository;
         this.folderRepository = folderRepository;
         this.commonFunctionService = commonFunctionService;
+        this.documentRepository = documentRepository;
     }
 
     @Override
@@ -86,6 +90,23 @@ public class DepartmentServiceImpl implements DepartmentService {
         department.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
         department.setDeleted(true);
         departmentRepository.save(department);
+
+        //delete folder related to department
+        List<Folder> folders = folderRepository.findByDepartmentId(departmentId);
+        for (Folder folder : folders) {
+            folder.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
+            folder.setDeleted(true);
+        }
+        //delete document related to department
+        List<Document> documents = documentRepository.findByReferenceDepartmentId(departmentId);
+        for (Document document : documents) {
+            document.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
+            document.setDeleted(true);
+        }
+
+        documentRepository.saveAll(documents);
+        folderRepository.saveAll(folders);
+
         return new DepartmentResponse(null, "Delete department successfully");
     }
 

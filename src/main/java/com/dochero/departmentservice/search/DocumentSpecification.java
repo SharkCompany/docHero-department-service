@@ -1,7 +1,7 @@
 package com.dochero.departmentservice.search;
 
 import com.dochero.departmentservice.constant.SearchOperation;
-import com.dochero.departmentservice.folder.entity.Folder;
+import com.dochero.departmentservice.document.entity.Document;
 import com.dochero.departmentservice.utils.QueryParamUtil;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,10 +17,10 @@ import javax.persistence.criteria.Root;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class FolderSearchSpecification<T> implements Specification<Folder> {
+public class DocumentSpecification<T> implements Specification<Document> {
     private SearchCriteria criteria;
 
-    public static <T> Specification<Folder> getSearchSpec(String searchField, String operation, Object searchValue) {
+    public static <T> Specification<Document> getSearchSpec(String searchField, String operation, Object searchValue) {
         if (!StringUtils.isNoneBlank(searchField, operation)) {
             return null;
         }
@@ -30,16 +30,16 @@ public class FolderSearchSpecification<T> implements Specification<Folder> {
             for (String wcc : QueryParamUtil.wildCardChars) {
                 value = StringUtils.replace(value, wcc, "\\" + wcc);
             }
-            return FolderSearchSpecification.builder()
+            return DocumentSpecification.builder()
                     .criteria(new SearchCriteria(searchField, operation, value)).build();
         }
-        return FolderSearchSpecification.builder()
+        return DocumentSpecification.builder()
                 .criteria(new SearchCriteria(searchField, operation, searchValue)).build();
     }
 
     @Nullable
     @Override
-    public Predicate toPredicate(Root<Folder> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+    public Predicate toPredicate(Root<Document> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
 
         if (criteria.getOperation().equalsIgnoreCase(SearchOperation.EQUAL)) {
             return criteriaBuilder.equal(root.get(criteria.getKey()), criteria.getValue());
