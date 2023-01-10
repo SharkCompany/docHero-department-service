@@ -216,9 +216,9 @@ public class DocumentServiceImpl implements DocumentService {
         Specification specs = null;
         Page result;
         if (StringUtils.isNotBlank(searchField) && StringUtils.isNotBlank(searchValue)) {
-            if ("title".equalsIgnoreCase(searchField)) {
+            if ("documentTitle".equalsIgnoreCase(searchField)) {
                 specs = DocumentSpecification.getSearchSpec("documentTitle", SearchOperation.LIKE, searchValue);
-            } else if ("department".equalsIgnoreCase(searchField)) {
+            } else if ("departmentId".equalsIgnoreCase(searchField)) {
                 specs = DocumentSpecification.getSearchSpec("referenceDepartmentId", SearchOperation.EQUAL, searchValue);
             }
         }
@@ -231,10 +231,10 @@ public class DocumentServiceImpl implements DocumentService {
 
         List<Document> records = result.toList();
         long totalItem = result.getTotalElements();
-        List<HomePageItemDTO> homePageItemDTOS = DocumentMapperUtils.mapListDocumentToListHomePageItemDTO(records, userDTOMap);
+        List<HomePageDocumentDTO> homePageDocumentDTOS = DocumentMapperUtils.mapListDocumentToListHomePageItemDTO(records, userDTOMap);
 
-        PaginationResponse<HomePageItemDTO> paginationResponse
-                = new PaginationResponse<>(pageable.getPageNumber(), pageable.getPageSize(), records.size(), (int)totalItem, homePageItemDTOS);
+        PaginationResponse<HomePageDocumentDTO> paginationResponse
+                = new PaginationResponse<>(pageable.getPageNumber(), pageable.getPageSize(), records.size(), (int)totalItem, homePageDocumentDTOS);
 
         return new DepartmentResponse(paginationResponse, "Get all documents successfully");
     }

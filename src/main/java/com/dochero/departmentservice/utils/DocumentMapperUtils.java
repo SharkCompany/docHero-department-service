@@ -49,11 +49,10 @@ public class DocumentMapperUtils {
     }
 
     //Map Document to HomePageItemDTO
-    public static HomePageItemDTO mapDocumentToHomePageItemDTO(Document document, Map<String, UserDTO> userDTOMap) {
-        return HomePageItemDTO.builder()
-                .itemId(document.getId())
-                .itemTitle(document.getDocumentTitle())
-                .isFolder(false)
+    public static HomePageDocumentDTO mapDocumentToHomePageItemDTO(Document document, Map<String, UserDTO> userDTOMap) {
+        return HomePageDocumentDTO.builder()
+                .id(document.getId())
+                .documentTitle(document.getDocumentTitle())
                 .folder(FolderDTO.builder()
                         .folderId(document.getFolder().getId())
                         .folderName(document.getFolder().getFolderName())
@@ -71,7 +70,7 @@ public class DocumentMapperUtils {
                 .build();
     }
     // Map List Document to List HomePageItemDTO
-    public static List<HomePageItemDTO> mapListDocumentToListHomePageItemDTO(List<Document> documents, Map<String, UserDTO> userDTOMap) {
+    public static List<HomePageDocumentDTO> mapListDocumentToListHomePageItemDTO(List<Document> documents, Map<String, UserDTO> userDTOMap) {
         return documents.stream().map(document -> mapDocumentToHomePageItemDTO(document, userDTOMap)).collect(Collectors.toList());
     }
 
