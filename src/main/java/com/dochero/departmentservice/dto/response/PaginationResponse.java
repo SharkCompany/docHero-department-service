@@ -1,4 +1,4 @@
-package com.dochero.departmentservice.dto;
+package com.dochero.departmentservice.dto.response;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -10,11 +10,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class PaginationItemDTO {
+public class PaginationResponse<T> {
     private Integer pageIndex;
     private Integer itemsPerPage;
     private Integer currentItemCount;
     private Integer totalItems;
-    private List<ItemDTO> items;
+    private List<T> items;
 }
