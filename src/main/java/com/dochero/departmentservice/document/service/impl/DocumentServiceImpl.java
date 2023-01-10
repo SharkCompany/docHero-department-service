@@ -20,13 +20,13 @@ import com.dochero.departmentservice.dto.request.CreateDocumentRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentDetailRequest;
 import com.dochero.departmentservice.dto.request.UpdateDocumentTitleRequest;
 import com.dochero.departmentservice.dto.response.DepartmentResponse;
+import com.dochero.departmentservice.dto.response.PaginationResponse;
 import com.dochero.departmentservice.exception.DocumentException;
 import com.dochero.departmentservice.exception.FolderException;
 import com.dochero.departmentservice.folder.entity.Folder;
 import com.dochero.departmentservice.folder.repository.FolderRepository;
 import com.dochero.departmentservice.search.DocumentSpecification;
 import com.dochero.departmentservice.utils.DocumentMapperUtils;
-import com.dochero.departmentservice.utils.FolderItemMapperUtil;
 import com.dochero.departmentservice.utils.QueryParamUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
@@ -231,17 +231,12 @@ public class DocumentServiceImpl implements DocumentService {
 
         List<Document> records = result.toList();
         long totalItem = result.getTotalElements();
-        List<ItemDTO> itemDTOS = FolderItemMapperUtil.mapListDocumentsToListItemDTO(records, userDTOMap);
+        List<HomePageItemDTO> homePageItemDTOS = DocumentMapperUtils.mapListDocumentToListHomePageItemDTO(records, userDTOMap);
 
-        PaginationItemDTO paginationItemDTO = PaginationItemDTO.builder()
-                .totalItems((int) totalItem)
-                .currentItemCount(records.size())
-                .itemsPerPage(pageable.getPageSize())
-                .pageIndex(pageable.getPageNumber())
-                .items(itemDTOS)
-                .build();
+        PaginationResponse<HomePageItemDTO> paginationResponse
+                = new PaginationResponse<>(pageable.getPageNumber(), pageable.getPageSize(), records.size(), (int)totalItem, homePageItemDTOS);
 
-        return new DepartmentResponse(paginationItemDTO, "Get all documents successfully");
+        return new DepartmentResponse(paginationResponse, "Get all documents successfully");
     }
 
     private boolean isDocumentTitleExist(String title, String extension, List<Document> documents) {
