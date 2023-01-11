@@ -13,9 +13,12 @@ public interface DocumentService {
 
     DepartmentResponse updateDocumentDetail(String documentId, UpdateDocumentDetailRequest request, String credentials);
 
-    DepartmentResponse getDocumentDetail(String documentId);
+    DepartmentResponse getDocumentDetail(String documentId, String credentials);
 
     DepartmentResponse deleteDocument(String documentId);
 
     DepartmentResponse getAllDocuments(Integer page, Integer record, String sortBy, String sortOrder, String searchField, String searchValue, String credentials);
+
+    DepartmentResponse getDocumentsRecentView(String userId);
+
 }

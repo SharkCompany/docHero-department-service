@@ -74,9 +74,10 @@ public class DocumentController {
     }
 
     @GetMapping("/{documentId}/detail")
-    public ResponseEntity<?> getDocumentDetail(@PathVariable("documentId") String documentId) {
+    public ResponseEntity<?> getDocumentDetail(@PathVariable("documentId") String documentId,
+                                               @RequestHeader(value = HttpHeaders.AUTHORIZATION, required = false) String credentials) {
         try {
-            return ResponseEntity.ok().body(documentService.getDocumentDetail(documentId));
+            return ResponseEntity.ok().body(documentService.getDocumentDetail(documentId, credentials));
         } catch (Exception e) {
             LOGGER.error("Failed to get document detail. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
@@ -107,6 +108,17 @@ public class DocumentController {
             return ResponseEntity.ok().body(documentService.getAllDocuments(page, record, sortBy, sortOrder, searchField, searchValue, credentials));
         } catch (Exception e) {
             LOGGER.error("Failed to get all document. " + e);
+            DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(body);
+        }
+    }
+
+    @GetMapping("/user/{userId}/recent-docs")
+    public ResponseEntity<?> getDocumentByListIds(@PathVariable("userId") String userId) {
+        try {
+            return ResponseEntity.ok().body(documentService.getDocumentsRecentView(userId));
+        } catch (Exception e) {
+            LOGGER.error("Failed to get list documents by id. " + e);
             DepartmentResponse body = new DepartmentResponse(e.getMessage(), HttpStatus.BAD_REQUEST.value());
             return ResponseEntity.badRequest().body(body);
         }

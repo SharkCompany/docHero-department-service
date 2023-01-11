@@ -14,4 +14,6 @@ public interface DocumentRepository extends JpaRepository<Document, String>, Jpa
     List<Document> findByReferenceFolderId(String parentFolderId);
 
     List<Document> findByReferenceDepartmentId(String departmentId);
+
+    List<Document> findByIdIn(List<String> documentIds);
 }

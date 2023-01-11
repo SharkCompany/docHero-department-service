@@ -1,9 +1,7 @@
 package com.dochero.departmentservice.document.service.impl;
 
 import com.dochero.departmentservice.client.DocumentRevisionClient;
-import com.dochero.departmentservice.client.dto.DocumentRevision;
-import com.dochero.departmentservice.client.dto.UpdateRevisionRequest;
-import com.dochero.departmentservice.client.dto.ValidateTokenResponse;
+import com.dochero.departmentservice.client.dto.*;
 import com.dochero.departmentservice.client.service.AccountClientService;
 import com.dochero.departmentservice.client.service.AuthenticationClientService;
 import com.dochero.departmentservice.client.service.DocumentRevisionFeignService;
@@ -42,6 +40,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DocumentServiceImpl implements DocumentService {
@@ -173,9 +172,14 @@ public class DocumentServiceImpl implements DocumentService {
     }
 
     @Override
-    public DepartmentResponse getDocumentDetail(String documentId) {
+    public DepartmentResponse getDocumentDetail(String documentId, String credentials) {
+
         Document document = documentRepository.findById(documentId)
                 .orElseThrow(() -> new DocumentException(AppMessage.DOCUMENT_NOT_FOUND_MESSAGE));
+
+        ValidateTokenResponse userInfo = commonFunctionService
+                .checkUserIsValidAndReturnUserInfo(document.getReferenceDepartmentId(), credentials);
+
         List<DocumentRevision> documentRevisions = documentRevisionFeignService.getDocumentRevisionByDocId(documentId);
         if (documentRevisions.isEmpty()) {
             DocumentRevision blankRevision = documentRevisionFeignService.createBlankRevision(documentId);
@@ -185,6 +189,12 @@ public class DocumentServiceImpl implements DocumentService {
 
         Map<String, UserDTO> mapUserDTOs = accountClientService.getAllUserDTOMap();
         DocumentDTO documentDTO = DocumentMapperUtils.mapDocumentToDocumentDTO(document, mapUserDTOs);
+
+        // Update viewed file history
+        accountClientService.updateFileHistory(userInfo.getUserId(), AccountFileHistoryUpdateRequest.builder()
+                .documentId(documentId)
+                .build());
+
         return new DepartmentResponse(documentDTO, "Get document detail successfully");
     }
 
@@ -238,6 +248,24 @@ public class DocumentServiceImpl implements DocumentService {
 
         return new DepartmentResponse(paginationResponse, "Get all documents successfully");
     }
+
+    @Override
+    public DepartmentResponse getDocumentsRecentView(String userId) {
+        Map<String, UserDTO> userDTOMap = accountClientService.getAllUserDTOMap();
+
+        List<AccountFileHistoryDTO> accountFileHistory = accountClientService.getAccountFileHistory(userId);
+        List<String> documentIdList = accountFileHistory.stream().map(AccountFileHistoryDTO::getDocumentId).collect(Collectors.toList());
+
+        Map<String, Timestamp> documentIdToViewedAtMap = accountFileHistory.stream()
+                .collect(Collectors.toMap(AccountFileHistoryDTO::getDocumentId, AccountFileHistoryDTO::getViewedAt));
+
+        List<Document> documents = documentRepository.findAllById(documentIdList);
+        List<HistoryFileItemDTO> historyFileItemDTOS = DocumentMapperUtils
+                .mapListDocumentToListHistoryFileItemDTO(documents, userDTOMap, documentIdToViewedAtMap);
+
+        return new DepartmentResponse(historyFileItemDTOS, "Get documents by document ids successfully");
+    }
+
 
     private boolean isDocumentTitleExist(String title, String extension, List<Document> documents) {
         return documents.stream().anyMatch(document ->
