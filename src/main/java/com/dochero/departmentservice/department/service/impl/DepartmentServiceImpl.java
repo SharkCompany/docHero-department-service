@@ -2,6 +2,7 @@ package com.dochero.departmentservice.department.service.impl;
 
 import com.dochero.departmentservice.document.repository.DocumentRepository;
 import com.dochero.departmentservice.dto.DepartmentDTO;
+import com.dochero.departmentservice.client.AccountClient;
 import com.dochero.departmentservice.common.service.CommonFunctionService;
 import com.dochero.departmentservice.constant.AdministratorConstants;
 import com.dochero.departmentservice.document.entity.Document;
@@ -25,7 +26,6 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
 
-
 @Service
 public class DepartmentServiceImpl implements DepartmentService {
     private static final Logger LOGGER = LoggerFactory.getLogger(DepartmentServiceImpl.class);
@@ -33,15 +33,19 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final DepartmentRepository departmentRepository;
     private final FolderRepository folderRepository;
     private final CommonFunctionService commonFunctionService;
+    private final AccountClient accountClient;
 
     private final DocumentRepository documentRepository;
 
     @Autowired
-    public DepartmentServiceImpl(DepartmentRepository departmentRepository, FolderRepository folderRepository, CommonFunctionService commonFunctionService, DocumentRepository documentRepository) {
+    public DepartmentServiceImpl(DepartmentRepository departmentRepository, FolderRepository folderRepository,
+            CommonFunctionService commonFunctionService, DocumentRepository documentRepository,
+            AccountClient accountClient) {
         this.departmentRepository = departmentRepository;
         this.folderRepository = folderRepository;
         this.commonFunctionService = commonFunctionService;
         this.documentRepository = documentRepository;
+        this.accountClient = accountClient;
     }
 
     @Override
@@ -76,7 +80,8 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public DepartmentResponse updateDepartment(String departmentId, DepartmentRequest request) {
-        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         department.setDepartmentName(request.getName());
         department.setDescription(request.getName());
         Department savedDepartment = departmentRepository.save(department);
@@ -86,23 +91,27 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     @Transactional
     public DepartmentResponse deleteDepartment(String departmentId) {
-        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         department.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
         department.setDeleted(true);
         departmentRepository.save(department);
 
-        //delete folder related to department
+        // delete folder related to department
         List<Folder> folders = folderRepository.findByDepartmentId(departmentId);
         for (Folder folder : folders) {
             folder.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
             folder.setDeleted(true);
         }
-        //delete document related to department
+        // delete document related to department
         List<Document> documents = documentRepository.findByReferenceDepartmentId(departmentId);
         for (Document document : documents) {
             document.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
             document.setDeleted(true);
         }
+
+        // remove department from accounts
+        accountClient.deleteDepartmentFromAccount(departmentId);
 
         documentRepository.saveAll(documents);
         folderRepository.saveAll(folders);
@@ -112,8 +121,9 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     private void deleteItemsBelongToDepartment(String departmentId) {
         Folder rootFolderByDepartmentId = commonFunctionService.getRootFolderByDepartmentId(departmentId);
-        List<Document> documentsByParentFolderId = commonFunctionService.getDocumentsByParentFolderId(rootFolderByDepartmentId.getId());
-        //soft delete all documents
+        List<Document> documentsByParentFolderId = commonFunctionService
+                .getDocumentsByParentFolderId(rootFolderByDepartmentId.getId());
+        // soft delete all documents
         documentsByParentFolderId.forEach(document -> {
             document.setDeleted(true);
             document.setDeletedAt(Timestamp.valueOf(LocalDateTime.now()));
@@ -124,7 +134,8 @@ public class DepartmentServiceImpl implements DepartmentService {
 
     @Override
     public DepartmentResponse getDepartmentById(String departmentId) {
-        Department department = departmentRepository.findById(departmentId).orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
+        Department department = departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new DepartmentException(AppMessage.DEPARTMENT_NOT_FOUND_MESSAGE));
         DepartmentDTO departmentDTO = DepartmentMapperUtils.convertToDepartmentDTO(department);
         return new DepartmentResponse(departmentDTO, "Get department by id successfully");
     }

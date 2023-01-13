@@ -6,6 +6,7 @@ import com.dochero.departmentservice.dto.UserDTO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -18,9 +19,13 @@ public interface AccountClient {
     @GetMapping("/accounts")
     List<UserDTO> getAllAccounts();
 
+    @PostMapping("/account/remove-department-from-account/{departmentId}")
+    void deleteDepartmentFromAccount(@PathVariable("departmentId") String departmentId);
+
     @GetMapping("/account/{userId}/file-history")
     List<AccountFileHistoryDTO> getAccountFileHistory(@PathVariable("userId") String userId);
 
     @PutMapping("/account/{id}/file-history")
-    AccountFileHistoryDTO updateFileHistory(@PathVariable("id") String userId, @RequestBody AccountFileHistoryUpdateRequest request);
+    AccountFileHistoryDTO updateFileHistory(@PathVariable("id") String userId,
+            @RequestBody AccountFileHistoryUpdateRequest request);
 }
