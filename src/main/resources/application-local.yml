@@ -9,16 +9,16 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         default_schema: dochero_department_db
   datasource:
-    url: jdbc:postgresql://103.142.137.207:12345/dochero_department_db
-    username: root
-    password: 123456
+    url: jdbc:postgresql://103.48.192.223:54322/dochero_department
+    username: ksharkinc
+    password: ksharkinc2022
     driverClassName: org.postgresql.Driver
 
   flyway:
-    url: jdbc:postgresql://103.142.137.207:12345/dochero_department_db
+    url: jdbc:postgresql://103.48.192.223:54322/dochero_department
     schemas: dochero_department_db
-    user: root
-    password: 123456
+    user: ksharkinc
+    password: ksharkinc2022
     locations: classpath:db/migration
 
 server:
@@ -32,4 +32,5 @@ document-revision-service:
 eureka:
   client:
     service-url:
-      defaultZone: http://45.119.85.106:40000/eureka
+#      defaultZone: http://45.119.85.106:40000/eureka
+      defaultZone: http://localhost:8761/eureka
